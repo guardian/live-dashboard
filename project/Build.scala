@@ -1,3 +1,4 @@
+import sbtassembly.Plugin.AssemblyKeys._
 import sbt._
 import Keys._
 import PlayProject._
@@ -24,6 +25,28 @@ object ApplicationBuild extends Build {
         "Typesafe Repository (snapshots)" at "http://repo.typesafe.com/typesafe/snapshots/",
         "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases"
       )
+    ).settings(
+      mainClass in assembly := Some("play.core.server.NettyServer"),
+      jarName in assembly := "%s.jar" format appName,
+
+      dist <<= myDistTask
     )
 
+  lazy val myDistTask = (baseDirectory, target, name, assembly in assembly) map {
+    (root, outDir, projectName, uberjar) =>
+      // Build  magenta capable zip
+      val distFile = outDir / "artifacts.zip"
+      if (distFile exists) {
+        distFile delete()
+      }
+
+      val filesToZip = Seq(
+        root / "conf" / "deploy.json" -> "deploy.json",
+        uberjar -> "packages/%s/%s".format(projectName, uberjar.getName)
+      )
+
+      IO.zip(filesToZip, distFile)
+
+      distFile
+  }
 }
