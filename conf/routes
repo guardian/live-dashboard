@@ -23,6 +23,7 @@ GET     /api/content                controllers.Api.content(callback: Option[Str
 
 POST    /incoming/sns               controllers.SNS.receive()
 
+GET     /pagestats                  controllers.PerPageStats(page, callback: Option[String] ?= None)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
