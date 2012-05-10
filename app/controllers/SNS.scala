@@ -27,7 +27,9 @@ object SNS extends Controller {
             responseCode = 200,
             referrer = view.documentReferrer,
             userAgent = view.userAgent.getOrElse("-"),
-            geo = "-"
+            geo = "-",
+            sel = view.previousPageSelector,
+            hash = view.previousPageElemHash
           )}
           for {
             e <- events.filterNot(_.isSelfRefresh)

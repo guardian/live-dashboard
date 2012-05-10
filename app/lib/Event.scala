@@ -12,7 +12,9 @@ case class Event(
   responseCode: Int,
   referrer: Option[String],
   userAgent: String,
-  geo: String) {
+  geo: String,
+  sel: Option[String] = None,
+  hash: Option[String] = None) {
 
   lazy val path = url takeWhile ('?' !=)
 

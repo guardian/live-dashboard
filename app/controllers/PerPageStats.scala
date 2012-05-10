@@ -8,14 +8,19 @@ import lib.Backend
 
 object PerPageStats extends Controller {
 
-  case class LinkDetail(sel: String, hash: String, count: Int)
+  case class LinkCount(sel: String, hash: String, count: Int)
 
   def apply(page: String, callback: Option[String] = None) = Action {
     Async {
       Backend.eventsFrom(page).asPromise map { events =>
         withCallback(callback) {
-          // need group by and to actually get selection/hash from original source
-          Serialization.write(events map (event => LinkDetail(event.)))
+          val eventMap = events groupBy { e => (e.sel.getOrElse(""), e.hash.getOrElse("")) }
+
+          val linkCounts = for {
+            ((selector, hash), clicks) <- eventMap
+          } yield LinkCount(selector, hash, clicks.size)
+
+          Serialization.write(linkCounts.toList)
         }
       }
     }
