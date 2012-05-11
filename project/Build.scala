@@ -1,7 +1,8 @@
-import sbtassembly.Plugin.AssemblyKeys._
 import sbt._
 import Keys._
 import PlayProject._
+import sbtassembly.Plugin._
+import AssemblyKeys._
 
 object ApplicationBuild extends Build {
 
@@ -21,7 +22,8 @@ object ApplicationBuild extends Build {
       "org.specs2" %% "specs2" % "1.6.1" % "test"
     )
 
-    val main = PlayProject(appName, appVersion, appDependencies).settings(defaultScalaSettings:_*).settings(
+    val main = PlayProject(appName, appVersion, appDependencies)
+      .settings(defaultScalaSettings ++ assemblySettings:_*).settings(
       resolvers ++= Seq(
         "Typesafe Repository (snapshots)" at "http://repo.typesafe.com/typesafe/snapshots/",
         "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases"
