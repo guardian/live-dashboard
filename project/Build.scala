@@ -28,7 +28,7 @@ object ApplicationBuild extends Build {
       )
     ).settings(
       mainClass in assembly := Some("play.core.server.NettyServer"),
-      jarName in assembly := "%s.jar" format appName,
+      jarName in assembly := "app.jar",
 
       dist <<= myDistTask
     )
@@ -41,9 +41,12 @@ object ApplicationBuild extends Build {
         distFile delete()
       }
 
+      def inPackage(name: String) = "packages/%s/%s" format (projectName, name)
+
       val filesToZip = Seq(
         root / "conf" / "deploy.json" -> "deploy.json",
-        uberjar -> "packages/%s/%s".format(projectName, uberjar.getName)
+        root / "bash" / "run.sh" -> inPackage("run.sh"),
+        uberjar -> inPackage(uberjar.getName)
       )
 
       IO.zip(filesToZip, distFile)

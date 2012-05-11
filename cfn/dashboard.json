@@ -107,7 +107,14 @@
             "#!/bin/bash -ev\n",
             "yum -y update\n",
 
-            "adduser --system --create-home live-dashboard\n",
+            "adduser --system --create-home jvmuser\n",
+
+            "cp -r /home/ec2-user/.ssh /home/jvmuser/\n",
+
+            "chown jvmuser:jvmuser /home/jvmuser/.ssh\n",
+            "chown jvmuser:jvmuser /home/jvmuser/.ssh/authorized_keys\n",
+
+            "echo 'jvmuser ALL = NOPASSWD:/sbin/service live-dashboard *' >> /etc/sudoers\n",
 
             "cat > /etc/stage <<EOF\n",
             { "Ref" : "Stage" }, "\n",
