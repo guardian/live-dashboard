@@ -6,7 +6,7 @@ import play.api.Logger
 
 object MqReader {
   // 10 is a magic number here : I know we're sampling 2 servers, and we have 20 in total
-  val SCALE_TO_FULL_SITE = 10
+  val SCALE_TO_FULL_SITE = Config.scalingFactor
 }
 
 //
