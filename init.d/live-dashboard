@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# chkconfig:    2345 80 20
+# description: live-dashboard run as an executable jar
 
 . /etc/rc.d/init.d/functions
 
