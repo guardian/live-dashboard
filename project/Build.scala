@@ -32,6 +32,14 @@ object ApplicationBuild extends Build {
       mainClass in assembly := Some("play.core.server.NettyServer"),
       jarName in assembly := "app.jar",
 
+      // aws-java-sdk brings in commons-logging, but we don't want that because
+      // we use slf4j's jcl-over-slf4j instead
+      ivyXML :=
+        <dependencies>
+            <exclude org="commons-logging"/>
+            <exclude org="org.springframework"/>
+        </dependencies>,
+
       dist <<= myDistTask
     )
 
