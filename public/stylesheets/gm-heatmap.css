@@ -1,0 +1,38 @@
+/* This stylesheet is pulled in by the gm1.user.js greasemonkey script to style the in-place live counts stuff */
+
+.greasy-heatmap {
+    position: absolute;
+    z-index: 9000;
+    font-size: 10pt;
+    border-radius: 3px;
+    color: white;
+    padding: 1px 3px 2px;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: black solid 2px;
+    text-indent: 0;
+}
+
+.greasy-heatmap:hover {
+    opacity: 0.5;
+}
+
+.pixies .new section,
+.eleven-col,
+.ten-col,
+.nine-col,
+.eight-col,
+.seven-col,
+.six-col,
+.five-col,
+.four-col,
+.three-and-a-half-col,
+.three-col,
+.two-and-a-half-col,
+.two-col,
+.one-and-a-half-col,
+.one-col
+{
+    overflow: visible !important;
+}
+
