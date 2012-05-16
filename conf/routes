@@ -20,10 +20,9 @@ GET     /contentChart                    controllers.Application.contentChart()
 GET     /api/counts                 controllers.Api.counts(callback: Option[String])
 GET     /api/search                 controllers.Api.search(callback: Option[String], since: Long ?= 0)
 GET     /api/content                controllers.Api.content(callback: Option[String], since: Long ?= 0)
+GET     /api/linkCounts             controllers.Api.linkCount(page, callback: Option[String] ?= None)
 
 POST    /incoming/sns               controllers.SNS.receive()
-
-GET     /pagestats                  controllers.PerPageStats.get(page, callback: Option[String] ?= None)
 
 GET     /js/heatmap.user.js         controllers.HeatMap.forEnv()
 
