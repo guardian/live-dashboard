@@ -19,6 +19,7 @@ object ApplicationBuild extends Build {
       "net.liftweb" %% "lift-json" % "2.4",
       "net.liftweb" %% "lift-json-ext" % "2.4",
       "com.amazonaws" % "aws-java-sdk" % "1.3.4",
+      "org.scala-tools.sbt" %% "io" % "0.11.2",
       "org.specs2" %% "specs2" % "1.6.1" % "test"
     )
 

@@ -1,13 +1,14 @@
+@(host: String)
 // ==UserScript==
-// @include	   http://www.guardian.co.uk/*
-// @include	   http://www.guardiannews.com/*
-// @include	   http://www.gucode.co.uk/*
-// @name           Guardian Heatmap
-// @namespace      http://www.guardian.co.uk/heatmap
-// @description    Shows a heat map (inspired by the bbc)
-// @version         0.1
+// @@include	   http://www.guardian.co.uk/*
+// @@include	   http://www.guardiannews.com/*
+// @@include	   http://www.gucode.co.uk/*
+// @@name           Guardian Heatmap
+// @@namespace      http://www.guardian.co.uk/heatmap
+// @@description    Shows a heat map (inspired by the bbc)
+// @@version         0.1
 // ==/UserScript==
-console.log("Starting GreasyCounter");
+console.log("Starting heatmap...");
 // a function that loads jQuery and calls a callback function when jQuery has finished loading
 function addJQuery(callback) {
   var script = document.createElement("script");
@@ -22,8 +23,7 @@ function addJQuery(callback) {
 
 // the guts of this userscript
 function main() {
-    var statsServer="http://qa-live-stats.ophan.co.uk";
-    // var statsServer="http://localhost:9000";
+    var statsServer="http://@host";
     // add our stylesheet
     $('head').append('<link rel="stylesheet" href="'+statsServer+'/assets/stylesheets/gm-heatmap.css" type="text/css" />');
 
