@@ -40,7 +40,7 @@ function main() {
     function updateStats() {
         console.log("Updating stats");
         var url = [location.protocol, '//', location.host, location.pathname].join('');
-        $.getJSON("http://qa-live-stats.ophan.co.uk/api/linkCounts?page="+url+"&callback=?", function(result) {
+        $.getJSON(statsServer+"/api/linkCounts?page="+url+"&callback=?", function(result) {
 
             var validThingys = _.chain(result)
                 .map(function(item) { item.node = $(item.sel); return item; })

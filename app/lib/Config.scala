@@ -14,8 +14,8 @@ object Config {
   lazy val stage = if (stageFile.exists) IO.read(stageFile).stripSuffix("\n") else "DEV"
 
   lazy val hostForEnv = Map(
-    "PROD" -> "live-dashboard.ophan.co.uk",
-    "QA" -> "qa-live-dashboard.ophan.co.uk"
+    "PROD" -> "live-stats.ophan.co.uk",
+    "QA" -> "qa-live-stats.ophan.co.uk"
   )
 
   lazy val host = hostForEnv.getOrElse(stage, "localhost:9000")
