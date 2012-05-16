@@ -135,6 +135,7 @@
         "GroupDescription" : "Open up SSH access and http to load balancer",
         "SecurityGroupIngress" : [
           { "IpProtocol": "tcp", "FromPort": "22",   "ToPort": "22",   "CidrIp": "0.0.0.0/0" },
+          { "IpProtocol": "tcp", "FromPort": "9000",   "ToPort": "9000",   "CidrIp": "0.0.0.0/0" },
           { "IpProtocol": "tcp", "FromPort": "9000",   "ToPort": "9000",
             "SourceSecurityGroupName": "amazon-elb-sg", "SourceSecurityGroupOwnerId": "amazon-elb" }
         ]
