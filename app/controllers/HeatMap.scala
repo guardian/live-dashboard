@@ -10,6 +10,7 @@ object HeatMap extends Controller {
 
 
   def forEnv() = Action {
-    Ok(views.html.heatmapuserjs(Config.host))(Writeable[Html](_.toString().getBytes()), ContentTypeOf(Some("application/json")))
+    Ok(views.html.heatmapuserjs(Config.host))(
+      Writeable[Html](_.toString().stripPrefix("\n").getBytes()), ContentTypeOf(Some("application/json")))
   }
 }
