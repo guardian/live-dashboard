@@ -15,7 +15,7 @@ object Api extends Controller {
     Ok(callback map { _ + "(" + block + ")" } getOrElse block).as("application/javascript")
   }
 
-  def fullData = Backend.currentHits.map { hit => hit.fullUrl -> hit }.toMap
+  def fullData = Backend.currentHits.map { hit => hit.url -> hit }.toMap
 
   def countsData = fullData.mapValues(_.tidyHitsPerSec)
 

@@ -34,7 +34,7 @@ object Event {
 
   def fromApacheLog(s: String) = s.trim() match {
     case LogRegex(ip, dt, method, url, responseCode, referrer, userAgent, geo) =>
-      Some(Event(ip, dateFormat.parseDateTime(dt), url, method, responseCode.toInt, cleanReferrer(referrer), userAgent, geo))
+      Some(Event(ip, dateFormat.parseDateTime(dt), "http://www.guardian.co.uk" + url, method, responseCode.toInt, cleanReferrer(referrer), userAgent, geo))
     case _ => None
   }
 }
