@@ -9,7 +9,7 @@
       "Stage": {
         "Description" : "Environment name",
         "Type": "String",
-        "AllowedValues" : [ "PROD", "QA" ]
+        "AllowedValues" : [ "PROD", "TEST" ]
       },
       "InstanceType" : {
         "Description" : "WebServer EC2 instance type",
@@ -22,8 +22,8 @@
 
   "Mappings" : {
     "Domain" : {
-      "PROD" : { "Name" : "live-stats.ophan.co.uk" },
-      "QA": { "Name" : "qa-live-stats.ophan.co.uk" }
+      "PROD" : { "Name" : "dashboard.ophan.co.uk" },
+      "TEST": { "Name" : "test-dashboard.ophan.co.uk" }
     }
   },
 
