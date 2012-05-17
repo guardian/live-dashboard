@@ -27,7 +27,7 @@ case class ClickStream(allClicks: GenSeq[Event], lastUpdated: DateTime, firstUpd
 }
 
 
-class ClickStreamActor extends Actor with ActorLogging {
+class ClickStreamActor(retentionPeriod: Long) extends Actor with ActorLogging {
   var clickStream = ClickStream(Nil.par, DateTime.now, DateTime.now)
 
   import ClickStreamActor._
@@ -39,7 +39,7 @@ class ClickStreamActor extends Actor with ActorLogging {
 
     case TruncateClickStream => {
       log.info("Truncating click stream (size=%d)" format clickStream.allClicks.size)
-      clickStream = clickStream.removeEventsBefore(DateTime.now - Config.eventHorizon)
+      clickStream = clickStream.removeEventsBefore(DateTime.now - retentionPeriod)
       log.info("Truncated click stream (size=%d)" format clickStream.allClicks.size)
     }
 

@@ -14,7 +14,7 @@ import ops._
 object Backend {
   implicit val system = ActorSystem("liveDashboard")
   val calculator = system.actorOf(Props[Calculator], name = "calculator")
-  val listener = system.actorOf(Props[ClickStreamActor], name = "clickStreamListener")
+  val listener = system.actorOf(Props(new ClickStreamActor(Config.eventHorizon)), name = "clickStreamListener")
   val searchTerms = system.actorOf(Props[SearchTermActor], name = "searchTermProcessor")
 
   val latestContent = new LatestContent
