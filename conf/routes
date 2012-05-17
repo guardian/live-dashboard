@@ -20,12 +20,21 @@ GET     /contentChart                    controllers.Application.contentChart()
 GET     /api/counts                 controllers.Api.counts(callback: Option[String])
 GET     /api/search                 controllers.Api.search(callback: Option[String], since: Long ?= 0)
 GET     /api/content                controllers.Api.content(callback: Option[String], since: Long ?= 0)
+GET     /api/linkCounts             controllers.Api.linkCount(page, callback: Option[String] ?= None)
 
 POST    /incoming/sns               controllers.SNS.receive()
 
+GET     /js/heatmap.user.js         controllers.HeatMap.forEnv()
+
+GET     /login                      controllers.Login.login
+POST    /login                      controllers.Login.loginPost
+GET     /openIDCallback             controllers.Login.openIDCallback
+GET     /logout                     controllers.Login.logout
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+GET     /health-check               controllers.Management.healthCheck()
 
 # and this one because the greasemonkey script references it
 # hmm doesn't work :(

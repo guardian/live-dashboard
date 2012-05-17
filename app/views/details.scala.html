@@ -27,7 +27,7 @@
 
         @for( (hit, idx) <- topStuff.hits.zipWithIndex ) {
 
-            <h2 id="@hit.id"><a class="toplink" href="@hit.fullUrl">@hit.url</a>
+            <h2 id="@hit.id"><a class="toplink" href="@hit.url">@hit.url</a>
             <small>@("%d hits (%.1f%%)".format(hit.hits, hit.percent))</small></h2>
 
             <ul>

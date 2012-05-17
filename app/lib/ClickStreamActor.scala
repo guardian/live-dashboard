@@ -39,7 +39,7 @@ class ClickStreamActor extends Actor with ActorLogging {
 
     case TruncateClickStream => {
       log.info("Truncating click stream (size=%d)" format clickStream.allClicks.size)
-      clickStream = clickStream.removeEventsBefore(DateTime.now - 15.minutes)
+      clickStream = clickStream.removeEventsBefore(DateTime.now - Config.eventHorizon)
       log.info("Truncated click stream (size=%d)" format clickStream.allClicks.size)
     }
 

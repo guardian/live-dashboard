@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# chkconfig:    2345 80 20
+# description: live-dashboard run as an executable jar
+
+. /etc/rc.d/init.d/functions
+
+USER=jvmuser
+APP_NAME=live-dashboard
+APP_HOME=/executable-jar-apps/$APP_NAME
+PIDFILE=$APP_HOME/RUNNING_PID
+RETVAL=0
+APP_LOCATION=https://s3-eu-west-1.amazonaws.com/ophan-dist/`cat /etc/stage`/$APP_NAME
+
+start() {
+        local RC
+
+        mkdir -p $APP_HOME
+        chown $USER:$USER $APP_HOME
+
+        echo -n $"Downloading new version of $APP_NAME: "
+
+        su -l $USER -c "wget $APP_LOCATION/app.jar -O $APP_HOME/app.jar" && \
+        su -l $USER -c "wget $APP_LOCATION/run.sh -O $APP_HOME/run.sh"
+
+        [ "$?" -eq 0 ] && success $"downloaded" || failure $"downloaded"
+
+        su -l $USER -c "chmod +x $APP_HOME/run.sh"
+
+        echo -n $"Starting $APP_NAME: "
+        daemon --user $USER --pidfile $PIDFILE $APP_HOME/run.sh
+        RETVAL=$?
+        echo
+}
+
+stop() {
+        echo -n $"Stopping $APP_NAME: "
+        killproc -p $PIDFILE $APP_NAME
+        RETVAL=$?
+        echo
+}
+   
+restart() {
+        stop
+        start
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|force-reload|reload)
+        restart
+        ;;
+  status)
+        status -p $PIDFILE $APP_NAME
+        RETVAL=$?
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|status|restart|reload|force-reload}"
+        exit 1
+esac
+  
+exit $RETVAL

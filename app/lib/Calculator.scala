@@ -39,7 +39,7 @@ class Calculator extends Actor {
           url = url,
           percent = hitCount.toDouble * 100 / totalClicks,
           hits = hitCount,
-          hitsPerSec = (hitCount.toDouble / clickStream.secs) * MqReader.SCALE_TO_FULL_SITE,
+          hitsPerSec = (hitCount.toDouble / clickStream.secs) * Config.scalingFactor,
           events = hits.toList)
     }
   }

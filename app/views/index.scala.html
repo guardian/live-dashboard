@@ -29,6 +29,13 @@
     </div>
 
     <div class="row">
+        <p>
+            <span class="label important">Important</span>
+            This dashboard is still in relative infancy. If something looks wrong, it might well be wrong.
+        </p>
+    </div>
+
+    <div class="row">
         <div class="span4">
             <h2>Big Screen Top 10</h2>
 
@@ -52,22 +59,24 @@
         </div>
 
         <div class="span4">
-            <p>
-                <span class="label important">Important</span>
-                This dashboard works by reading server logs and is still in relative infancy.
-                Please be aware of its potential limitations:
+            <h2>Heatmap</h2>
+
+            <p>A script to provide a heatmap of pages showing which links out from any given page
+                to another Guardian page are most clicked.
             </p>
 
             <ul>
-                <li>Only traffic to www.guardian.co.uk is monitored.
-                    (Specifically, traffic from guardiannews.com is <strong>not</strong> included.)</li>
-                <li>It samples 10% of site traffic. Experience suggests this gives a good overall picture, but could mislead.</li>
-
-                <li>Currently, bot traffic is not excluded. This <em>will</em> mislead. (We&rsquo;re working on this.)</li>
+                <li>To use in Firefox, you'll need to install
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/">
+                        the Greasemonkey add-on</a> then click the link below.
+                </li>
+                <li>
+                    To use in Chrome, just click the link below.
+                </li>
 
             </ul>
 
-
+            <p><a class="btn" href='@routes.HeatMap.forEnv()'>Install &raquo;</a></p>
         </div>
     </div>
 

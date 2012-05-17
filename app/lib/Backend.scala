@@ -33,8 +33,10 @@ object Backend {
     system.scheduler.schedule(1 seconds, 20 seconds) { ukFrontLinkTracker.refresh() }
     system.scheduler.schedule(20 seconds, 60 seconds) { usFrontLinkTracker.refresh() }
 
-    spawn {
-      mqReader.start()
+    if (Config.listenToMessageQueue) {
+      spawn {
+        mqReader.start()
+      }
     }
 
     listener ! Event("1.1.1.1", new DateTime(), "/dummy", "GET", 200, Some("http://www.google.com"), "my agent", "geo!")
@@ -42,7 +44,9 @@ object Backend {
   }
 
   def stop() {
-    mqReader.stop()
+    if (Config.listenToMessageQueue) {
+      mqReader.stop()
+    }
     system.shutdown()
   }
 
@@ -59,6 +63,10 @@ object Backend {
 
   def liveSearchTermsFuture = (searchTerms ? SearchTermActor.GetSearchTerms).mapTo[List[GuSearchTerm]]
   def liveSearchTerms = Await.result(liveSearchTermsFuture, timeout.duration)
+
+  def eventsFrom(page: String) = (listener ? ClickStreamActor.GetClickStream).mapTo[ClickStream] map { clickStream =>
+    clickStream.userClicks.filter(_.referrer == Some(page))
+  }
 
   // this one uses an agent: this is the model that others should follow
   // (agents are multi non-blocking read, single update)
