@@ -57,7 +57,7 @@ case class ListsOfStuff(
     lastUpdated.toString(fmt)
   )
 
-  lazy val hitsScaledToAllServers = totalHits * MqReader.SCALE_TO_FULL_SITE
+  lazy val hitsScaledToAllServers = totalHits * Config.scalingFactor
   lazy val hitsPerSecond = if (clickStreamSecs == 0) "N/A" else (hitsScaledToAllServers / clickStreamSecs).toString
 
   println("hits = %d, timePeriodSecs = %d, hps = %s" format (totalHits, clickStreamSecs, hitsPerSecond))

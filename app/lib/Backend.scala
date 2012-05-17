@@ -33,8 +33,10 @@ object Backend {
     system.scheduler.schedule(1 seconds, 20 seconds) { ukFrontLinkTracker.refresh() }
     system.scheduler.schedule(20 seconds, 60 seconds) { usFrontLinkTracker.refresh() }
 
-    spawn {
-      mqReader.start()
+    if (Config.listenToMessageQueue) {
+      spawn {
+        mqReader.start()
+      }
     }
 
     listener ! Event("1.1.1.1", new DateTime(), "/dummy", "GET", 200, Some("http://www.google.com"), "my agent", "geo!")
@@ -42,7 +44,9 @@ object Backend {
   }
 
   def stop() {
-    mqReader.stop()
+    if (Config.listenToMessageQueue) {
+      mqReader.stop()
+    }
     system.shutdown()
   }
 
