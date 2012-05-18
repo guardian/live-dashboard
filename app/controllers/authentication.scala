@@ -105,7 +105,7 @@ object Login extends Controller with Logging {
             }
           } else {
             Redirect(routes.Login.login).flashing(
-              ("error" -> "I'm afraid you can only log into Riff-Raff using your Guardian Google Account")
+              ("error" -> "I'm afraid you can only log into the dashboard using your Guardian Google Account")
             ).withSession(session - "identity")
           }
         }

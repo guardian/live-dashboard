@@ -60,6 +60,8 @@ case class ListsOfStuff(
   lazy val hitsScaledToAllServers = totalHits * Config.scalingFactor
   lazy val hitsPerSecond = if (clickStreamSecs == 0) "N/A" else (hitsScaledToAllServers / clickStreamSecs).toString
 
+  lazy val minutesOfData = Config.eventHorizon / 1000 / 60
+
   println("hits = %d, timePeriodSecs = %d, hps = %s" format (totalHits, clickStreamSecs, hitsPerSecond))
 
   def diff(newList: List[HitReport], clicks: ClickStream) = {
