@@ -64,9 +64,6 @@ object Backend {
   def liveSearchTermsFuture = (searchTerms ? SearchTermActor.GetSearchTerms).mapTo[List[GuSearchTerm]]
   def liveSearchTerms = Await.result(liveSearchTermsFuture, timeout.duration)
 
-  def eventsFrom(page: String) = (listener ? ClickStreamActor.GetClickStream).mapTo[ClickStream] map { clickStream =>
-    clickStream.userClicks.filter(_.referrer == Some(page))
-  }
 
   // this one uses an agent: this is the model that others should follow
   // (agents are multi non-blocking read, single update)
