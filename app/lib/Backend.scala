@@ -19,7 +19,7 @@ object Backend {
 
   val latestContent = new LatestContent
 
-  val ukFrontLinkTracker = new LinkTracker("http://www.guardian.co.uk")
+  val ukFrontLinkTracker = new LinkTracker("http://www.guardiannews.com/uk-home")
   val usFrontLinkTracker = new LinkTracker("http://www.guardiannews.com")
 
   val eventProcessors = listener :: searchTerms :: Nil
