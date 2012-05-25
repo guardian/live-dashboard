@@ -1,3 +1,4 @@
+@(topStuff: lib.ListsOfStuff)
 <!DOCTYPE html>
 <html>
 <head>
@@ -37,22 +38,11 @@
 
     <div class="row">
         <div class="span4">
-            <h2>Big Screen Top 10</h2>
-
-            <p>The orignal classic-style dashboard, ideal for people who sit a long way from their screens,
-                on mobile devices, or who can&rsquo;t find their glasses right now.</p>
-
-            <p>Shows the top ten most accessed pages over the last 15 minutes in a single Top of the Pops inspired list.</p>
-
-            <p><a class="btn" href="@routes.Application.top10()">Show Me &raquo;</a></p>
-        </div>
-
-        <div class="span4">
             <h2>Top 20</h2>
 
             <p>Designed for local desktop use.</p>
 
-            <p>Shows the top twenty most accessed pages over the last 15 minutes, split into content pages
+            <p>Shows the top twenty most accessed pages over the last @topStuff.minutesOfData minutes, split into content pages
             and everything else.</p>
 
             <p><a class="btn" href="@routes.Application.top20()">Show Me &raquo;</a></p>
@@ -78,41 +68,6 @@
 
             <p><a class="btn" href="http://heatmap.ophan.co.uk/js/heatmap.user.js">Install &raquo;</a></p>
         </div>
-    </div>
-
-    <div class="row">
-        <div class="span4">
-            <h2>Overlay View</h2>
-
-            <p>Overlay overall hits per second when browsing the live
-            site. Be careful: it shows overall hits for the page the link points at, NOT how many people clicked the link.
-            Use SiteCatalyst's heat map for that!</p>
-
-            <ul>
-                <li>To use in Firefox, you'll need to install
-                    <a href="https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/">
-                        the Greasemonkey add-on</a> then click the link below.
-                </li>
-                <li>
-                    To use in Chrome, just click the link below.
-                </li>
-
-            </ul>
-
-            <p><a class="btn" href='@routes.Assets.at("js/gm1.user.js")'>Install &raquo;</a></p>
-        </div>
-
-        <div class="span4">
-            <h2>Search</h2>
-
-            <p>Displays a live view of what people are searching for on
-                <a href="http://www.guardian.co.uk/search">http://www.guardian.co.uk/search</a>,
-            as they search.</p>
-
-            <p><a class="btn" href="@routes.Application.search()">Show Me &raquo;</a></p>
-
-        </div>
-
 
         <div class="span4">
             <h2>Recently Published</h2>
@@ -124,19 +79,31 @@
 
             <p>
                 Against each item of content shows the overall hits per second that item of content
-                has received in the last 15 minutes &em; the same number that is displayed on
-                the overlay and the top 20 charts.
+                has received in the last @topStuff.minutesOfData minutes, the same number that is displayed
+                on the top 20 charts.
             </p>
 
             <p><a class="btn" href="@routes.Application.content()">Show Me &raquo;</a></p>
 
         </div>
+    </div>
 
+    <div class="row">
+        <div class="span4">
+            <h2>Big Screen Top 10</h2>
+
+            <p>The orignal classic-style dashboard, ideal for people who sit a long way from their screens,
+                on mobile devices, or who can&rsquo;t find their glasses right now.</p>
+
+            <p>Shows the top ten most accessed pages over the last @topStuff.minutesOfData minutes in a single Top of the Pops inspired list.</p>
+
+            <p><a class="btn" href="@routes.Application.top10()">Show Me &raquo;</a></p>
+        </div>
     </div>
 
     <footer>
-        Brought to you by Graham Tackley and others in the Digital Development Team, totally inspired by ideas flowing from
-        Chris Moran and Mary Hamilton.
+        Brought to you by Graham Tackley, Phil Wills and others in the Digital Development Team,
+        totally inspired by ideas flowing from Chris Moran and Mary Hamilton.
     </footer>
 </div>
 

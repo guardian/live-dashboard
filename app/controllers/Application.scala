@@ -8,7 +8,7 @@ import org.joda.time.{DateTimeZone, DateTime}
 
 object Application extends Controller {
   
-  def index = AuthAction { Ok(views.html.index()) }
+  def index = AuthAction { Ok(views.html.index(Backend.currentLists)) }
 
   def top10 = AuthAction { Ok(views.html.top10(Backend.currentLists.all)) }
   def top10chart = AuthAction { Ok(views.html.snippets.top10chart(Backend.currentLists.all)) }
