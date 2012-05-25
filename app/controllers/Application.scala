@@ -2,9 +2,9 @@ package controllers
 
 import play.api._
 import play.api.mvc._
-import org.joda.time.DateTime
 import lib.{HitReport, Backend}
 import com.gu.openplatform.contentapi.model.{MediaAsset, Tag, Content => ApiContent}
+import org.joda.time.{DateTimeZone, DateTime}
 
 object Application extends Controller {
   
@@ -35,7 +35,7 @@ object Application extends Controller {
 
     Backend.publishedContent.map { c =>
       PublishedContent(
-        c.webPublicationDate, c.webUrl, c.webTitle,
+        c.webPublicationDate.withZone(london), c.webUrl, c.webTitle,
         currentHits.get(c.webUrl).map(_.tidyHitsPerSec).getOrElse("0"),
         c.sectionName.getOrElse(""),
         c.safeFields.get("trailText"),
@@ -49,6 +49,7 @@ object Application extends Controller {
       )
     }
   }
+  lazy val london = DateTimeZone.forID("Europe/London")
 
   def content = Action {
     Ok(views.html.content(publishedContent))
