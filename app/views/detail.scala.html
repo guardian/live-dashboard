@@ -1,0 +1,48 @@
+@(page: lib.HitReport)
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Stats Detail</title>
+
+    @views.html.snippets.includes()
+
+    <style>
+        body { counter-reset: url; margin: 20px; }
+        h2 { counter-increment: url;}
+        h2:before { content: counter(url) " "; }
+        pre { font-size: 7pt; overflow: auto; white-space: pre; word-wrap: normal; }
+    </style>
+
+<body>
+
+<div>
+
+    <div class="page-header">
+        <h1>Detail for page.url
+        </h1>
+    </div>
+
+    <div class="data">
+        <h2 id="@page.id"><a class="toplink" href="@page.url">@page.url</a>
+        <small>@("%d hits (%.1f%%)".format(page.hits, page.percent))</small></h2>
+
+        <ul>
+            @for( (referrer, refHits) <- page.referrers.groupBy(identity).toList.sortBy(_._1) ) {
+              <li>
+                <a href="@referrer">@referrer</a> @if(refHits.size > 1) { (@refHits.size) }
+              </li>
+            }
+        </ul>
+
+        <pre class="logentries">
+@page.events.sortBy(_.dt.getMillis).map(_.asLogString).mkString("\n")
+        </pre>
+    </div>
+
+    <footer>
+        <p>Note that all referrers are shown in alphabetical order</p>
+        <a href='@routes.Application.top20()' style="float: right">back to Top 20</a>
+    </footer>
+</div>
+</body>
+</html>

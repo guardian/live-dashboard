@@ -3,6 +3,7 @@ package lib
 import xml.NodeSeq
 import java.net.URL
 import org.scala_tools.time.Imports._
+import controllers.routes
 
 sealed abstract class Movement { def img: Option[String] }
 case class Unchanged() extends Movement { val img = None }
@@ -26,6 +27,8 @@ case class HitReport(url: String, percent: Double, hits: Int, hitsPerSec: Double
   lazy val id = url.replace("/", "")
 
   lazy val fullUrl = url
+
+  lazy val detailUrl = routes.Application.detail(id)
 
   lazy val cssClass = if (hitsPerSec >= 1.0) "high" else ""
 

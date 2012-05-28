@@ -18,6 +18,10 @@ object Application extends Controller {
 
   def details = AuthAction { Ok(views.html.details(Backend.currentLists.everything)) }
 
+  def detail(id: String) = AuthAction { Ok(views.html.detail(
+    Backend.currentLists.everything.hits.find(_.id == id).get)
+  )}
+
   def search = AuthAction { Ok(views.html.search()) }
 
   private def publishedContent = {
