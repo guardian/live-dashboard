@@ -31,7 +31,7 @@ GET     /logout                     controllers.Login.logout
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
-GET     /health-check               controllers.Management.healthCheck()
+GET     /health-check               controllers.Management.apply(path="/health-check")
 
 GET     /management$path<.*>        controllers.Management.apply(path)
 POST    /management$path<.*>        controllers.Management.apply(path)
