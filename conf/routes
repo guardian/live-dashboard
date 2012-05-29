@@ -33,9 +33,6 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 GET     /health-check               controllers.Management.healthCheck()
 
-GET     /management$path<.*>        controllers.Management.apply(path)
-POST    /management$path<.*>        controllers.Management.apply(path)
-
 # and this one because the greasemonkey script references it
 # hmm doesn't work :(
 #GET     /static/gm-stats.css        controllers.Assets.at(path="/public", file="stylesheets/gm-stats.css")

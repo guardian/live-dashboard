@@ -58,8 +58,7 @@ case class ListsOfStuff(
   )
 
   lazy val hitsScaledToAllServers = totalHits * Config.scalingFactor
-  lazy val hitsPerSecond = hitsPerSecondOption.getOrElse("N/A").toString
-  lazy val hitsPerSecondOption = if (clickStreamSecs == 0) None else  Some(hitsScaledToAllServers / clickStreamSecs)
+  lazy val hitsPerSecond = if (clickStreamSecs == 0) "N/A" else (hitsScaledToAllServers / clickStreamSecs).toString
 
   lazy val minutesOfData = Config.eventHorizon / 1000 / 60
 

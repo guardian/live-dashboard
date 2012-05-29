@@ -13,15 +13,15 @@ import ops._
 
 object Backend {
   implicit val system = ActorSystem("liveDashboard")
-
   val calculator = system.actorOf(Props[Calculator], name = "calculator")
   val listener = system.actorOf(Props(new ClickStreamActor(Config.eventHorizon)), name = "clickStreamListener")
   val searchTerms = system.actorOf(Props[SearchTermActor], name = "searchTermProcessor")
+
   val latestContent = new LatestContent
 
   val ukFrontLinkTracker = new LinkTracker("http://www.guardiannews.com/uk-home")
-
   val usFrontLinkTracker = new LinkTracker("http://www.guardiannews.com")
+
   val eventProcessors = listener :: searchTerms :: Nil
 
   val mqReader = new MqReader(eventProcessors)
@@ -50,10 +50,10 @@ object Backend {
     system.shutdown()
   }
 
-  implicit val timeout = Timeout(5 seconds)
-
   // So this is a bad way to do this, should use akka Agents instead (which can read
   // without sending a message.)
+
+  implicit val timeout = Timeout(5 seconds)
 
   def currentStats = Await.result( (calculator ? Calculator.GetStats).mapTo[(List[HitReport], ListsOfStuff)], 5 seconds)
 
@@ -62,14 +62,12 @@ object Backend {
   def currentHits = currentStats._1
 
   def liveSearchTermsFuture = (searchTerms ? SearchTermActor.GetSearchTerms).mapTo[List[GuSearchTerm]]
-
   def liveSearchTerms = Await.result(liveSearchTermsFuture, timeout.duration)
+
+
   // this one uses an agent: this is the model that others should follow
   // (agents are multi non-blocking read, single update)
   def publishedContent = latestContent.latest()
-
-
-  def viewsPerSecond = currentLists.hitsPerSecondOption.getOrElse(0L)
 
   def minutesOfData = {
     val currentData = currentLists

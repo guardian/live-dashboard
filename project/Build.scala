@@ -20,7 +20,6 @@ object ApplicationBuild extends Build {
       "net.liftweb" %% "lift-json-ext" % "2.4",
       "com.amazonaws" % "aws-java-sdk" % "1.3.4",
       "org.scala-tools.sbt" %% "io" % "0.11.2",
-      "com.gu" %% "management-play" % "5.12",
       "org.specs2" %% "specs2" % "1.6.1" % "test"
     )
 
@@ -43,8 +42,6 @@ object ApplicationBuild extends Build {
         </dependencies>,
 
       dist <<= myDistTask
-    ).dependsOn(
-      uri("git://github.com/guardian/sbt-version-info-plugin.git#2.1")
     )
 
   lazy val myDistTask = (baseDirectory, target, name, assembly in assembly) map {
