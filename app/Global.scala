@@ -3,12 +3,7 @@ import controllers._
 import lib.Backend
 import play.api._
 
-object Global extends GlobalSettings with RequestTimer with StatusCounters {
-  override val requestTimer = RequestTimingMetric
-  override val okCounter = Request200s
-  override val redirectCounter = Request30xs
-  override val notFoundCounter = Request404s
-  override val errorCounter = Request50xs
+object Global extends GlobalSettings {
 
   override def onStart(app: Application) {
     Logger.info("Starting...")
