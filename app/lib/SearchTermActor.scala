@@ -18,7 +18,7 @@ class SearchTermActor extends Actor {
 
   protected def receive = {
     case e: Event =>
-      if (e.path == "/search") {
+      if (e.path.endsWith("/search")) {
         val params = new QueryStringDecoder(e.url).getParameters.map{ case (k, v) => k -> v.head }.toMap
           .filter { case (k, v) => v.length > 0}
 
