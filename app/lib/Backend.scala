@@ -19,9 +19,9 @@ object Backend {
   val searchTerms = system.actorOf(Props[SearchTermActor], name = "searchTermProcessor")
   val latestContent = new LatestContent
 
-  val ukFrontLinkTracker = new LinkTracker("http://www.guardiannews.com/uk-home")
-
+  val ukFrontLinkTracker = new LinkTracker("http://www.guardian.co.uk")
   val usFrontLinkTracker = new LinkTracker("http://www.guardiannews.com")
+
   val eventProcessors = listener :: searchTerms :: Nil
 
   val mqReader = new MqReader(eventProcessors)
