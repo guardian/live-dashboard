@@ -22,7 +22,7 @@
         <ul>
             @for( (referrer, refHits) <- page.referrersWithCounts ) {
               <li>
-                <a href="@referrer">@referrer</a> @if(refHits.size > 1) { (@refHits.size) }
+                <a href="@referrer">@referrer</a> @if(refHits > 1) { (@refHits) }
               </li>
             }
         </ul>

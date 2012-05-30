@@ -17,8 +17,8 @@ case class HitReport(url: String, percent: Double, hits: Int, hitsPerSec: Double
 
   lazy val referrers = events flatMap { _.referrer }
 
-  lazy val referrersWithCounts = referrers.groupBy(identity).toList.sortWith {
-    (x,y) => y._2.size < x._2.size
+  lazy val referrersWithCounts = referrers.groupBy(identity).mapValues(_.size).toList.sortWith {
+    (x,y) => y._2 < x._2
   }
 
   lazy val referrerHostCounts = referrers.flatMap(url => try { Some(new URL(url).getHost) } catch { case _ => None })
