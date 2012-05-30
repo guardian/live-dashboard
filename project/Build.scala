@@ -42,7 +42,14 @@ object ApplicationBuild extends Build {
             <exclude org="org.springframework"/>
         </dependencies>,
 
-      dist <<= myDistTask
+      dist <<= myDistTask,
+
+      mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
+        {
+          case "logger.xml" => MergeStrategy.last
+          case x => old(x)
+        }
+      }
     ).dependsOn(
       uri("git://github.com/guardian/sbt-version-info-plugin.git#2.1")
     )
