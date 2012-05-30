@@ -4,6 +4,7 @@ import xml.NodeSeq
 import java.net.URL
 import org.scala_tools.time.Imports._
 import controllers.routes
+import play.api.Logger
 
 sealed abstract class Movement { def img: Option[String] }
 case class Unchanged() extends Movement { val img = None }
@@ -70,7 +71,7 @@ case class ListsOfStuff(
 
   lazy val minutesOfData = Config.eventHorizon / 1000 / 60
 
-  println("hits = %d, timePeriodSecs = %d, hps = %s" format (totalHits, clickStreamSecs, hitsPerSecond))
+  Logger.info("hits = %d, timePeriodSecs = %d, hps = %s" format (totalHits, clickStreamSecs, hitsPerSecond))
 
   def diff(newList: List[HitReport], clicks: ClickStream) = {
     val (newContent, newOther) = newList.partition(isContent)

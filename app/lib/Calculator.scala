@@ -1,13 +1,12 @@
 package lib
 
-import akka.actor.Actor
+import akka.actor.{ActorLogging, Actor}
 import play.api.Logger
 
 
 
 
-class Calculator extends Actor {
-  val log = Logger(getClass)
+class Calculator extends Actor with ActorLogging {
 
   // this is a raw list of all the hits we've seen, rolled up by path
   private var currentTopPaths: List[HitReport] = Nil
