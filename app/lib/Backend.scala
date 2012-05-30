@@ -55,13 +55,25 @@ object Backend {
   // So this is a bad way to do this, should use akka Agents instead (which can read
   // without sending a message.)
 
-  def currentStats = Await.result( (calculator ? Calculator.GetStats).mapTo[(List[HitReport], ListsOfStuff)], 5 seconds)
+  def currentStats = Await.result(
+    (calculator ? Calculator.GetStats).mapTo[(List[HitReport], ListsOfStuff)], 5 seconds
+  )
 
   def currentLists = currentStats._2
 
   def currentHits = currentStats._1
 
   def liveSearchTermsFuture = (searchTerms ? SearchTermActor.GetSearchTerms).mapTo[List[GuSearchTerm]]
+
+  def userAgents = Await.result(
+    (listener ? ClickStreamActor.GetClickStream).mapTo[ClickStream].map { cs =>
+      cs.allClicks
+        .groupBy(_.userAgent)
+        .map { case (agent, list) => agent -> list.size }
+        .toList
+        .sortBy { case (agent, count) => -count }
+    }, 5 seconds
+  )
 
   def liveSearchTerms = Await.result(liveSearchTermsFuture, timeout.duration)
   // this one uses an agent: this is the model that others should follow

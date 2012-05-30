@@ -24,6 +24,10 @@ object Application extends Controller {
 
   def search = AuthAction { Ok(views.html.search()) }
 
+  def userAgents = AuthAction { Ok(views.html.userAgents() ) }
+
+  def userAgentsChart = AuthAction { Ok(views.html.snippets.userAgentsChart()) }
+
   private def publishedContent = {
 
     def altTextOfMainImageFor(c: ApiContent): Option[String] = {

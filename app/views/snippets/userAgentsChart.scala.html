@@ -1,0 +1,19 @@
+@import lib.Backend
+@datawarning()
+<div class="page-header">
+    <table class="table table-striped">
+        @defining(Backend.userAgents) { userAgents =>
+        @defining(userAgents.map(_._2).sum) { totalHits =>
+            @for( (agent, count) <- Backend.userAgents) {
+              <tr>
+                  <td>@count</td>
+                  <td>@(count * 100 / totalHits)%</td>
+                  <td>@agent</td>
+              </tr>
+            }
+        }
+        }
+
+    </table>
+
+</div>
