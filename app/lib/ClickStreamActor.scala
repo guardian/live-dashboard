@@ -3,6 +3,7 @@ package lib
 import akka.actor._
 import collection.GenSeq
 import org.scala_tools.time.Imports._
+import akka.agent.Agent
 
 
 // it's very very important that this class is totally immutable!
@@ -34,26 +35,27 @@ class ClickStreamActor(retentionPeriod: Long) extends Actor with ActorLogging {
 
   protected def receive = {
     case e: Event => {
-      clickStream += e
+      Backend.clickStreamAgent.add(e)
     }
 
     case TruncateClickStream => {
-      log.info("Truncating click stream (size=%d)" format clickStream.allClicks.size)
-      clickStream = clickStream.removeEventsBefore(DateTime.now - retentionPeriod)
-      log.info("Truncated click stream (size=%d)" format clickStream.allClicks.size)
+      Backend.clickStreamAgent.truncate()
     }
 
-    case GetClickStream => sender ! clickStream
-
-    case SendClickStreamTo(actor) => actor ! clickStream
+    case SendClickStreamTo(actor) => actor ! Backend.clickStreamAgent.get()
 
   }
 }
+class ClickStreamAgent(retentionPeriod: Long)(implicit sys: ActorSystem) {
+  val clickStream = Agent[ClickStream](ClickStream(Nil.par, DateTime.now, DateTime.now))
 
+  def add(e: Event) = clickStream send (_ + (e))
+  def truncate() = clickStream sendOff(_.removeEventsBefore(DateTime.now - retentionPeriod))
+  def get() = clickStream.get()
+}
 object ClickStreamActor {
   sealed trait Messages
   case object TruncateClickStream extends Messages
-  case object GetClickStream extends Messages
   case class SendClickStreamTo(actor: ActorRef) extends Messages
 
 }

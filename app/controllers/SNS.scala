@@ -34,7 +34,10 @@ object SNS extends Controller {
           for {
             e <- events.filterNot(_.isSelfRefresh)
             actor <- Backend.eventProcessors
-          } actor ! e
+          } {
+            actor ! e
+            Backend.clickStreamAgent.add(e)
+          }
 
           Ok("")
         }

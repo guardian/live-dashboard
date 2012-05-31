@@ -22,7 +22,9 @@ object Backend {
   val ukFrontLinkTracker = new LinkTracker("http://www.guardian.co.uk")
   val usFrontLinkTracker = new LinkTracker("http://www.guardiannews.com")
 
-  val eventProcessors = listener :: searchTerms :: Nil
+  val clickStreamAgent = new ClickStreamAgent(Config.eventHorizon)
+
+  val eventProcessors =  searchTerms :: Nil
 
   val mqReader = new MqReader(eventProcessors)
 
