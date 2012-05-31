@@ -4,6 +4,7 @@ import xml.NodeSeq
 import java.net.URL
 import org.scala_tools.time.Imports._
 import controllers.routes
+import play.api.Logger
 
 sealed abstract class Movement { def img: Option[String] }
 case class Unchanged() extends Movement { val img = None }
@@ -16,6 +17,10 @@ case class HitReport(url: String, percent: Double, hits: Int, hitsPerSec: Double
   def summary = "%s %.1f%% (%d hits)" format(url, percent, hits)
 
   lazy val referrers = events flatMap { _.referrer }
+
+  lazy val referrersWithCounts = referrers.groupBy(identity).mapValues(_.size).toList.sortWith {
+    (x,y) => y._2 < x._2
+  }
 
   lazy val referrerHostCounts = referrers.flatMap(url => try { Some(new URL(url).getHost) } catch { case _ => None })
     .groupBy(identity).mapValues(_.size).toList.sortBy(_._2).reverse
@@ -66,7 +71,7 @@ case class ListsOfStuff(
 
   lazy val minutesOfData = Config.eventHorizon / 1000 / 60
 
-  println("hits = %d, timePeriodSecs = %d, hps = %s" format (totalHits, clickStreamSecs, hitsPerSecond))
+  Logger.info("hits = %d, timePeriodSecs = %d, hps = %s" format (totalHits, clickStreamSecs, hitsPerSecond))
 
   def diff(newList: List[HitReport], clicks: ClickStream) = {
     val (newContent, newOther) = newList.partition(isContent)
