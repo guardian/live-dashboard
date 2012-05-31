@@ -8,7 +8,7 @@ import akka.agent.Agent
 
 // it's very very important that this class is totally immutable!
 case class ClickStream(allClicks: GenSeq[Event], lastUpdated: DateTime, firstUpdated: DateTime) {
-  lazy val userClicks = allClicks filterNot isBot
+  lazy val userClicks = allClicks
 
   def +(e: Event) = copy(allClicks = e +: allClicks, lastUpdated = e.dt)
 
@@ -18,10 +18,6 @@ case class ClickStream(allClicks: GenSeq[Event], lastUpdated: DateTime, firstUpd
   )
 
   def ageMs = DateTime.now.millis - lastUpdated.millis
-
-  private def isBot(e: Event) =
-    e.userAgent.startsWith("facebookexternalhit") ||
-    e.userAgent == "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10 (.NET CLR 3.5.30729)"
 
   lazy val timePeriodMillis = lastUpdated.millis - firstUpdated.millis
   lazy val secs = timePeriodMillis / 1000

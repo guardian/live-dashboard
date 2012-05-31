@@ -83,7 +83,7 @@ case class ListsOfStuff(
       other = other.diff(newOther take 20),
       lastUpdated = clicks.lastUpdated,
       firstUpdated = clicks.firstUpdated,
-      totalHits = clicks.userClicks.size,
+      totalHits = clicks.allClicks.size,
       clickStreamSecs = clicks.secs
     )
   }
