@@ -73,7 +73,7 @@
         "MaxSize" : "1",
         "DesiredCapacity" : "1",
         "HealthCheckType" : "ELB",
-        "HealthCheckGracePeriod" : 60,
+        "HealthCheckGracePeriod" : 120,
         "LoadBalancerNames" : [ { "Ref": "LoadBalancer" }],
         "Tags" : [
           { "Key" : "Stage", "Value" : { "Ref" : "Stage" }, "PropagateAtLaunch" : "true"  },
