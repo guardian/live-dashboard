@@ -30,7 +30,7 @@ object Backend {
 
   def start() {
     system.scheduler.schedule(1 minute, 1 minute, listener, ClickStreamActor.TruncateClickStream)
-    system.scheduler.schedule(5 seconds, 5 seconds, listener, ClickStreamActor.SendClickStreamTo(calculator))
+    system.scheduler.schedule(5 seconds, 5 seconds, calculator, clickStreamAgent.get())
     system.scheduler.schedule(5 seconds, 30 seconds) { latestContent.refresh() }
     system.scheduler.schedule(1 seconds, 20 seconds) { ukFrontLinkTracker.refresh() }
     system.scheduler.schedule(20 seconds, 60 seconds) { usFrontLinkTracker.refresh() }
@@ -67,15 +67,11 @@ object Backend {
 
   def liveSearchTermsFuture = (searchTerms ? SearchTermActor.GetSearchTerms).mapTo[List[GuSearchTerm]]
 
-  def userAgents = Await.result(
-    (listener ? ClickStreamActor.GetClickStream).mapTo[ClickStream].map { cs =>
-      cs.allClicks
-        .groupBy(_.userAgent)
-        .map { case (agent, list) => agent -> list.size }
-        .toList
-        .sortBy { case (agent, count) => -count }
-    }, 5 seconds
-  )
+  def userAgents = clickStreamAgent.get().allClicks
+    .groupBy(_.userAgent)
+    .map { case (agent, list) => agent -> list.size }
+    .toList
+    .sortBy { case (agent, count) => -count }
 
   def liveSearchTerms = Await.result(liveSearchTermsFuture, timeout.duration)
   // this one uses an agent: this is the model that others should follow
