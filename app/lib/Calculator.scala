@@ -1,10 +1,10 @@
 package lib
 
-import akka.actor.{ActorLogging, Actor}
 import play.api.Logger
 import akka.agent.Agent
+import akka.actor.{ActorSystem, ActorLogging, Actor}
 
-class CalculatorAgent {
+class CalculatorAgent(implicit sys: ActorSystem) {
   val hitReports = Agent[List[HitReport]](List())
   val listsOfStuff = Agent[ListsOfStuff](ListsOfStuff())
 
