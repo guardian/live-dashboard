@@ -25,8 +25,6 @@ case class ClickStream(allClicks: GenSeq[Event], lastUpdated: DateTime, firstUpd
 
 
 class ClickStreamActor(retentionPeriod: Long) extends Actor with ActorLogging {
-  var clickStream = ClickStream(Nil.par, DateTime.now, DateTime.now)
-
   import ClickStreamActor._
 
   protected def receive = {
@@ -37,9 +35,6 @@ class ClickStreamActor(retentionPeriod: Long) extends Actor with ActorLogging {
     case TruncateClickStream => {
       Backend.clickStreamAgent.truncate()
     }
-
-    case SendClickStreamTo(actor) => actor ! Backend.clickStreamAgent.get()
-
   }
 }
 class ClickStreamAgent(retentionPeriod: Long)(implicit sys: ActorSystem) {
@@ -52,8 +47,6 @@ class ClickStreamAgent(retentionPeriod: Long)(implicit sys: ActorSystem) {
 object ClickStreamActor {
   sealed trait Messages
   case object TruncateClickStream extends Messages
-  case class SendClickStreamTo(actor: ActorRef) extends Messages
-
 }
 
 

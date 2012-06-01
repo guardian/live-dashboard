@@ -46,6 +46,8 @@ class MqReader(consumers: List[ActorRef]) {
 
       for (e <- event; a <- consumers) a ! e
 
+      for (e <- event) Backend.clickStreamAgent.add(e)
+
     } while (keepRunning)
 
     sub.close()

@@ -23,6 +23,7 @@ object Backend {
   val usFrontLinkTracker = new LinkTracker("http://www.guardiannews.com")
 
   val clickStreamAgent = new ClickStreamAgent(Config.eventHorizon)
+  val calculatorAgent = new CalculatorAgent()
 
   val eventProcessors =  searchTerms :: Nil
 
@@ -57,9 +58,7 @@ object Backend {
   // So this is a bad way to do this, should use akka Agents instead (which can read
   // without sending a message.)
 
-  def currentStats = Await.result(
-    (calculator ? Calculator.GetStats).mapTo[(List[HitReport], ListsOfStuff)], 5 seconds
-  )
+  def currentStats = calculatorAgent.get()
 
   def currentLists = currentStats._2
 
