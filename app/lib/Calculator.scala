@@ -1,29 +1,20 @@
 package lib
 
-import akka.actor.{ActorLogging, Actor}
 import play.api.Logger
+import akka.agent.Agent
+import akka.actor.ActorSystem
 
+class Calculator(implicit sys: ActorSystem) {
+  val hitReports = Agent(List[HitReport]())
+  val listsOfStuff = Agent(ListsOfStuff())
 
-
-
-class Calculator extends Actor with ActorLogging {
-
-  // this is a raw list of all the hits we've seen, rolled up by path
-  private var currentTopPaths: List[HitReport] = Nil
-
-  // this is all sorts of sublists suitable for ui display (based on the above)
-  private var listsOfStuff: ListsOfStuff = ListsOfStuff()
-
-  import Calculator._
-  protected def receive = {
-    case cs: ClickStream =>
-      log.info("Recalculating...")
-      currentTopPaths = calcTopPaths(cs)
-      listsOfStuff = listsOfStuff.diff(currentTopPaths, cs)
-      log.info("Done")
-
-    case GetStats => sender ! (currentTopPaths, listsOfStuff)
+  def calculate(cs: ClickStream) {
+    Logger.info("Recalculating...")
+    hitReports sendOff (_ => calcTopPaths(cs))
+    listsOfStuff sendOff (_.diff(hitReports.get(), cs))
   }
+
+  def get() = (hitReports.get(), listsOfStuff.get())
 
   private def calcTopPaths(clickStream: ClickStream) = {
     val totalClicks = clickStream.allClicks.size
@@ -42,10 +33,5 @@ class Calculator extends Actor with ActorLogging {
           events = hits.toList)
     }
   }
-}
-
-object Calculator {
-  sealed trait Messages
-  case object GetStats extends Messages
 }
 
