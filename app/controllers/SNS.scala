@@ -31,13 +31,11 @@ object SNS extends Controller {
             sel = view.previousPageSelector,
             hash = view.previousPageElemHash
           )}
+
           for {
             e <- events.filterNot(_.isSelfRefresh)
-            actor <- Backend.eventProcessors
-          } {
-            actor ! e
-            Backend.clickStreamAgent.add(e)
-          }
+            p <- Backend.eventProcessors
+          } p + e
 
           Ok("")
         }

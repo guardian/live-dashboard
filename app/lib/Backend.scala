@@ -14,22 +14,22 @@ import ops._
 object Backend {
   implicit val system = ActorSystem("liveDashboard")
 
-  val searchTerms = system.actorOf(Props[SearchTermActor], name = "searchTermProcessor")
   val latestContent = new LatestContent
 
   val ukFrontLinkTracker = new LinkTracker("http://www.guardian.co.uk")
   val usFrontLinkTracker = new LinkTracker("http://www.guardiannews.com")
 
-  val clickStreamAgent = new ClickStreamAgent(Config.eventHorizon)
-  val calculatorAgent = new CalculatorAgent()
+  val clickStream = new ClickStreamAgent(Config.eventHorizon)
+  val calculator = new Calculator()
+  val searchTerms = new SearchTermAgent()
 
-  val eventProcessors =  searchTerms :: Nil
+  val eventProcessors = clickStream :: searchTerms :: Nil
 
   val mqReader = new MqReader(eventProcessors)
 
   def start() {
-    system.scheduler.schedule(1 minute, 1 minute) { clickStreamAgent.truncate() }
-    system.scheduler.schedule(5 seconds, 5 seconds) { calculatorAgent.calculate(clickStreamAgent.get()) }
+    system.scheduler.schedule(1 minute, 1 minute) { clickStream.truncate() }
+    system.scheduler.schedule(5 seconds, 5 seconds) { calculator.calculate(clickStream()) }
     system.scheduler.schedule(5 seconds, 30 seconds) { latestContent.refresh() }
     system.scheduler.schedule(1 seconds, 20 seconds) { ukFrontLinkTracker.refresh() }
     system.scheduler.schedule(20 seconds, 60 seconds) { usFrontLinkTracker.refresh() }
@@ -39,8 +39,6 @@ object Backend {
         mqReader.start()
       }
     }
-
-    searchTerms ! Event("1.1.1.1", new DateTime(), "/search?q=dummy&a=b&c=d%2Fj", "GET", 200, Some("http://www.google.com"), "my agent", "geo!")
   }
 
   def stop() {
@@ -52,26 +50,20 @@ object Backend {
 
   implicit val timeout = Timeout(5 seconds)
 
-  // So this is a bad way to do this, should use akka Agents instead (which can read
-  // without sending a message.)
-
-  def currentStats = calculatorAgent.get()
+  def currentStats = calculator.get()
 
   def currentLists = currentStats._2
 
   def currentHits = currentStats._1
 
-  def liveSearchTermsFuture = (searchTerms ? SearchTermActor.GetSearchTerms).mapTo[List[GuSearchTerm]]
-
-  def userAgents = clickStreamAgent.get().allClicks
+  def userAgents = clickStream().allClicks
     .groupBy(_.userAgent)
     .map { case (agent, list) => agent -> list.size }
     .toList
     .sortBy { case (agent, count) => -count }
 
-  def liveSearchTerms = Await.result(liveSearchTermsFuture, timeout.duration)
-  // this one uses an agent: this is the model that others should follow
-  // (agents are multi non-blocking read, single update)
+  def liveSearchTerms = searchTerms()
+
   def publishedContent = latestContent.latest()
 
 

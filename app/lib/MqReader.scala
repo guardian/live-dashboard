@@ -7,7 +7,7 @@ import play.api.Logger
 //
 // NB: akka 1.3 supports 0MQ actors, should use that instead
 //
-class MqReader(consumers: List[ActorRef]) {
+class MqReader(processors: Seq[EventProcessor]) {
   val logger = Logger(getClass)
   var keepRunning = true
   
@@ -44,9 +44,7 @@ class MqReader(consumers: List[ActorRef]) {
             e.path.startsWith("/global/adcode/generate")
         }
 
-      for (e <- event; a <- consumers) a ! e
-
-      for (e <- event) Backend.clickStreamAgent.add(e)
+      for (e <- event; p <- processors) p + e
 
     } while (keepRunning)
 

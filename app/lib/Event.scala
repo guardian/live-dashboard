@@ -39,3 +39,7 @@ object Event {
   }
 }
 
+trait EventProcessor {
+  def + (e: Event) : Unit
+}
+

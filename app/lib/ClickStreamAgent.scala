@@ -23,13 +23,15 @@ case class ClickStream(allClicks: GenSeq[Event], lastUpdated: DateTime, firstUpd
   lazy val secs = timePeriodMillis / 1000
 }
 
-class ClickStreamAgent(retentionPeriod: Long)(implicit sys: ActorSystem) {
+class ClickStreamAgent(retentionPeriod: Long)(implicit sys: ActorSystem) extends EventProcessor {
   val clickStream = Agent(ClickStream(Nil.par, DateTime.now, DateTime.now))
 
-  def add(e: Event) = clickStream send (_ + (e))
+  def + (e: Event) = clickStream send (_ + (e))
   def truncate() = clickStream sendOff(_.removeEventsBefore(DateTime.now - retentionPeriod))
-  def get() = clickStream.get()
+  def apply() = clickStream()
 }
+
+
 
 
 
