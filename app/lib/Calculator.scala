@@ -2,14 +2,14 @@ package lib
 
 import play.api.Logger
 import akka.agent.Agent
-import akka.actor.{ActorSystem, ActorLogging, Actor}
+import akka.actor.ActorSystem
 
 class CalculatorAgent(implicit sys: ActorSystem) {
-  val hitReports = Agent[List[HitReport]](List())
-  val listsOfStuff = Agent[ListsOfStuff](ListsOfStuff())
+  val hitReports = Agent(List[HitReport]())
+  val listsOfStuff = Agent(ListsOfStuff())
 
   def calculate(cs: ClickStream) {
-//    log.info("Recalculating...")
+    Logger.info("Recalculating...")
     hitReports sendOff (_ => calcTopPaths(cs))
     listsOfStuff sendOff (_.diff(hitReports.get(), cs))
   }
@@ -32,14 +32,6 @@ class CalculatorAgent(implicit sys: ActorSystem) {
           hitsPerSec = (hitCount.toDouble / clickStream.secs) * Config.scalingFactor,
           events = hits.toList)
     }
-  }
-}
-
-
-class Calculator extends Actor with ActorLogging {
-  protected def receive = {
-    case cs: ClickStream =>
-      Backend.calculatorAgent.calculate(cs)
   }
 }
 

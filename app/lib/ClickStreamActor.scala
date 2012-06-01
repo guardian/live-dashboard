@@ -23,31 +23,14 @@ case class ClickStream(allClicks: GenSeq[Event], lastUpdated: DateTime, firstUpd
   lazy val secs = timePeriodMillis / 1000
 }
 
-
-class ClickStreamActor(retentionPeriod: Long) extends Actor with ActorLogging {
-  import ClickStreamActor._
-
-  protected def receive = {
-    case e: Event => {
-      Backend.clickStreamAgent.add(e)
-    }
-
-    case TruncateClickStream => {
-      Backend.clickStreamAgent.truncate()
-    }
-  }
-}
 class ClickStreamAgent(retentionPeriod: Long)(implicit sys: ActorSystem) {
-  val clickStream = Agent[ClickStream](ClickStream(Nil.par, DateTime.now, DateTime.now))
+  val clickStream = Agent(ClickStream(Nil.par, DateTime.now, DateTime.now))
 
   def add(e: Event) = clickStream send (_ + (e))
   def truncate() = clickStream sendOff(_.removeEventsBefore(DateTime.now - retentionPeriod))
   def get() = clickStream.get()
 }
-object ClickStreamActor {
-  sealed trait Messages
-  case object TruncateClickStream extends Messages
-}
+
 
 
 
