@@ -14,21 +14,22 @@ import ops._
 object Backend {
   implicit val system = ActorSystem("liveDashboard")
 
-  val calculator = system.actorOf(Props[Calculator], name = "calculator")
-  val listener = system.actorOf(Props(new ClickStreamActor(Config.eventHorizon)), name = "clickStreamListener")
-  val searchTerms = system.actorOf(Props[SearchTermActor], name = "searchTermProcessor")
   val latestContent = new LatestContent
 
   val ukFrontLinkTracker = new LinkTracker("http://www.guardian.co.uk")
   val usFrontLinkTracker = new LinkTracker("http://www.guardiannews.com")
 
-  val eventProcessors = listener :: searchTerms :: Nil
+  val clickStream = new ClickStreamAgent(Config.eventHorizon)
+  val calculator = new Calculator()
+  val searchTerms = new SearchTermAgent()
+
+  val eventProcessors = clickStream :: searchTerms :: Nil
 
   val mqReader = new MqReader(eventProcessors)
 
   def start() {
-    system.scheduler.schedule(1 minute, 1 minute, listener, ClickStreamActor.TruncateClickStream)
-    system.scheduler.schedule(5 seconds, 5 seconds, listener, ClickStreamActor.SendClickStreamTo(calculator))
+    system.scheduler.schedule(1 minute, 1 minute) { clickStream.truncate() }
+    system.scheduler.schedule(5 seconds, 5 seconds) { calculator.calculate(clickStream()) }
     system.scheduler.schedule(5 seconds, 30 seconds) { latestContent.refresh() }
     system.scheduler.schedule(1 seconds, 20 seconds) { ukFrontLinkTracker.refresh() }
     system.scheduler.schedule(20 seconds, 60 seconds) { usFrontLinkTracker.refresh() }
@@ -38,9 +39,6 @@ object Backend {
         mqReader.start()
       }
     }
-
-    listener ! Event("1.1.1.1", new DateTime(), "/dummy", "GET", 200, Some("http://www.google.com"), "my agent", "geo!")
-    searchTerms ! Event("1.1.1.1", new DateTime(), "/search?q=dummy&a=b&c=d%2Fj", "GET", 200, Some("http://www.google.com"), "my agent", "geo!")
   }
 
   def stop() {
@@ -52,32 +50,20 @@ object Backend {
 
   implicit val timeout = Timeout(5 seconds)
 
-  // So this is a bad way to do this, should use akka Agents instead (which can read
-  // without sending a message.)
-
-  def currentStats = Await.result(
-    (calculator ? Calculator.GetStats).mapTo[(List[HitReport], ListsOfStuff)], 5 seconds
-  )
+  def currentStats = calculator.get()
 
   def currentLists = currentStats._2
 
   def currentHits = currentStats._1
 
-  def liveSearchTermsFuture = (searchTerms ? SearchTermActor.GetSearchTerms).mapTo[List[GuSearchTerm]]
+  def userAgents = clickStream().allClicks
+    .groupBy(_.userAgent)
+    .map { case (agent, list) => agent -> list.size }
+    .toList
+    .sortBy { case (agent, count) => -count }
 
-  def userAgents = Await.result(
-    (listener ? ClickStreamActor.GetClickStream).mapTo[ClickStream].map { cs =>
-      cs.allClicks
-        .groupBy(_.userAgent)
-        .map { case (agent, list) => agent -> list.size }
-        .toList
-        .sortBy { case (agent, count) => -count }
-    }, 5 seconds
-  )
+  def liveSearchTerms = searchTerms()
 
-  def liveSearchTerms = Await.result(liveSearchTermsFuture, timeout.duration)
-  // this one uses an agent: this is the model that others should follow
-  // (agents are multi non-blocking read, single update)
   def publishedContent = latestContent.latest()
 
 
