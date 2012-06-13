@@ -10,6 +10,8 @@ object Application extends Controller {
   
   def index = AuthAction { Ok(views.html.index(Backend.currentLists)) }
 
+  def about = Action { Ok(views.html.about()) }
+
   def top10 = AuthAction { Ok(views.html.top10(Backend.currentLists.all)) }
   def top10chart = AuthAction { Ok(views.html.snippets.top10chart(Backend.currentLists.all)) }
 

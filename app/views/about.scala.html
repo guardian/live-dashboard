@@ -1,8 +1,7 @@
-@(topStuff: lib.ListsOfStuff)
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Index</title>
+    <title>About</title>
     <link href='http://fonts.googleapis.com/css?family=Reenie+Beanie' rel='stylesheet' type='text/css'>
 
     @views.html.snippets.includes()
@@ -25,86 +24,23 @@
 <div class="container">
     <div class="hero-unit">
         <h1>The Guardian&rsquo;s SEO Dashboard</h1>
-
-        <p>What's going on right now?</p>
     </div>
 
-    <div class="row">
-        <p>
-            <span class="label important">Important</span>
-            This dashboard is still in relative infancy. If something looks wrong, it might well be wrong.
-        </p>
-    </div>
 
-    <div class="row">
-        <div class="span4">
-            <h2>Top 20</h2>
-
-            <p>Designed for local desktop use.</p>
-
-            <p>Shows the top twenty most accessed pages over the last @topStuff.minutesOfData minutes, split into content pages
-            and everything else.</p>
-
-            <p><a class="btn" href="@routes.Application.top20()">Show Me &raquo;</a></p>
-        </div>
-
-        <div class="span4">
-            <h2>Heatmap</h2>
-
-            <p>A script to provide a heatmap of pages showing which links out from any given page
-                to another Guardian page are most clicked.
-            </p>
-
-            <ul>
-                <li>To use in Firefox, you'll need to install
-                    <a href="https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/">
-                        the Greasemonkey add-on</a> then click the link below.
-                </li>
-                <li>
-                    To use in Chrome, just click the link below.
-                </li>
-
-            </ul>
-
-            <p><a class="btn" href="http://heatmap.ophan.co.uk/js/heatmap.user.js">Install &raquo;</a></p>
-        </div>
-
-        <div class="span4">
-            <h2>Recently Published</h2>
-
-            <p>
-                Displays all content published on www.guardian.co.uk in the last 4 hours
-                (using the <a href="http://content.guardianapis.com">Open Platform Content API</a>).
-            </p>
-
-            <p>
-                Against each item of content shows the overall hits per second that item of content
-                has received in the last @topStuff.minutesOfData minutes, the same number that is displayed
-                on the top 20 charts.
-            </p>
-
-            <p><a class="btn" href="@routes.Application.content()">Show Me &raquo;</a></p>
-
+    <div class="row-fluid">
+        <div class="span12">
+            <h2>What is the SEO Dashboard?</h2>
+            <p>The SEO dashboard is an experimental live view of what's happening on the Guardian website right now.</p>
+            <h2>Is it a replacement for Omniture?</h2>
+            <p>No.  The reporting provided here is made on a best efforts basis, but wouldn't be suitable for an ABCe
+                audit.  There are many jobs for which Omniture remains the best tool.</p>
+            <h2>You said it's experimental, does that mean it might go away?</h2>
+            <p>Yes, but that's less likely to happen if you let us know it's useful to you.</p>
+            <h2>Who's it for?</h2>
+            <p>It's available to all Guardian staff.  It's been developed with ideas from Chris Moran and Mary Hamilton
+            providing feedback, but we hope it can help everyone make decisions.</p>
         </div>
     </div>
-
-    <div class="row">
-        <div class="span4">
-            <h2>Big Screen Top 10</h2>
-
-            <p>The orignal classic-style dashboard, ideal for people who sit a long way from their screens,
-                on mobile devices, or who can&rsquo;t find their glasses right now.</p>
-
-            <p>Shows the top ten most accessed pages over the last @topStuff.minutesOfData minutes in a single Top of the Pops inspired list.</p>
-
-            <p><a class="btn" href="@routes.Application.top10()">Show Me &raquo;</a></p>
-        </div>
-    </div>
-
-    <footer>
-        Brought to you by Graham Tackley, Phil Wills and others in the Digital Development Team,
-        totally inspired by ideas flowing from Chris Moran and Mary Hamilton.
-    </footer>
 </div>
 
 </body>
