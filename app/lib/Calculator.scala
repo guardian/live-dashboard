@@ -14,8 +14,6 @@ class Calculator(implicit sys: ActorSystem) {
     listsOfStuff sendOff (_.diff(hitReports.get(), cs))
   }
 
-  def get() = (hitReports.get(), listsOfStuff.get())
-
   private def calcTopPaths(clickStream: ClickStream) = {
     val totalClicks = clickStream.allClicks.size
     val clicksPerPath = clickStream.allClicks.groupBy(_.path).map {

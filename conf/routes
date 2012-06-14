@@ -16,17 +16,12 @@ GET     /detail/:id               controllers.Application.detail(id: String)
 
 GET     /search                     controllers.Application.search()
 
-GET     /user-agents                controllers.Application.userAgents()
-GET     /user-agents/data           controllers.Application.userAgentsChart()
-
 GET     /content                    controllers.Application.content()
 GET     /contentChart                controllers.Application.contentChart()
 
 GET     /api/counts                 controllers.Api.counts(callback: Option[String])
 GET     /api/search                 controllers.Api.search(callback: Option[String], since: Long ?= 0)
 GET     /api/content                controllers.Api.content(callback: Option[String], since: Long ?= 0)
-
-POST    /incoming/sns               controllers.SNS.receive()
 
 GET     /login                      controllers.Login.login
 POST    /login                      controllers.Login.loginPost
