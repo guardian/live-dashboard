@@ -16,7 +16,6 @@ object Backend {
   private val calculator = new Calculator()
   private val searchTerms = new SearchTermAgent()
 
-
   def start() {
     system.scheduler.schedule(1 minute, 1 minute) { clickStream.truncate() }
     system.scheduler.schedule(5 seconds, 5 seconds) { calculator.calculate(clickStream()) }

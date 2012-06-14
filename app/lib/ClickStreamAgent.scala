@@ -5,7 +5,6 @@ import collection.GenSeq
 import org.scala_tools.time.Imports._
 import akka.agent.Agent
 
-
 // it's very very important that this class is totally immutable!
 case class ClickStream(allClicks: GenSeq[Event], lastUpdated: DateTime, firstUpdated: DateTime) {
   lazy val userClicks = allClicks
@@ -26,19 +25,8 @@ case class ClickStream(allClicks: GenSeq[Event], lastUpdated: DateTime, firstUpd
 class ClickStreamAgent(retentionPeriod: Long)(implicit sys: ActorSystem) extends EventProcessor {
   val clickStream = Agent(ClickStream(Nil.par, DateTime.now, DateTime.now))
 
-  def + (e: Event) = clickStream send (_ + (e))
-  def truncate() = clickStream sendOff(_.removeEventsBefore(DateTime.now - retentionPeriod))
+  def +(e: Event) = clickStream send (_ + (e))
+  def truncate() = clickStream sendOff (_.removeEventsBefore(DateTime.now - retentionPeriod))
   def apply() = clickStream()
 }
-
-
-
-
-
-
-
-
-
-
-
 

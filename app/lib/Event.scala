@@ -3,18 +3,17 @@ package lib
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.DateTime
 
-
 case class Event(
-  ip: String,
-  dt: DateTime,
-  url: String,
-  method: String,
-  responseCode: Int,
-  referrer: Option[String],
-  userAgent: String,
-  geo: String,
-  sel: Option[String] = None,
-  hash: Option[String] = None) {
+    ip: String,
+    dt: DateTime,
+    url: String,
+    method: String,
+    responseCode: Int,
+    referrer: Option[String],
+    userAgent: String,
+    geo: String,
+    sel: Option[String] = None,
+    hash: Option[String] = None) {
 
   lazy val path = url takeWhile ('?' !=)
 
@@ -24,7 +23,6 @@ case class Event(
 
   def isSelfRefresh = referrer.exists(_.startsWith("http://www.guardian.co.uk" + path))
 }
-
 
 object Event {
   val LogRegex = """(\S*) \S* \S* \[(.*)\] "(\S*) (\S*) \S*" (\d*) \S* "(\S*)" "(.*?)" "(.*?)".*""".r
@@ -40,6 +38,6 @@ object Event {
 }
 
 trait EventProcessor {
-  def + (e: Event) : Unit
+  def +(e: Event): Unit
 }
 

@@ -10,7 +10,6 @@ import org.joda.time.DateTime
 object Api extends Controller {
   implicit val formats = Serialization.formats(NoTypeHints) ++ ext.JodaTimeSerializers.all
 
-
   def withCallback(callback: Option[String])(block: => String) = {
     Ok(callback map { _ + "(" + block + ")" } getOrElse block).as("application/javascript")
   }
@@ -18,7 +17,6 @@ object Api extends Controller {
   def fullData = Backend.currentHits.map { hit => hit.url -> hit }.toMap
 
   def countsData = fullData.mapValues(_.tidyHitsPerSec)
-
 
   def counts(callback: Option[String]) = Action {
     withCallback(callback) {
@@ -32,7 +30,6 @@ object Api extends Controller {
       Serialization.write(response)
     }
   }
-
 
   case class ApiContent(path: String, title: String, publishDate: Long, publishDateString: String)
 

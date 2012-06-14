@@ -65,7 +65,9 @@ object AuthAction {
 
 }
 
-object Login extends Controller with Logging {
+object Login extends Controller {
+  lazy val loginLog = Logger("login")
+
   val openIdAttributes = Seq(
     ("email", "http://axschema.org/contact/email"),
     ("firstname", "http://axschema.org/namePerson/first"),
@@ -83,9 +85,9 @@ object Login extends Controller with Logging {
       OpenID
         .redirectURL(googleOpenIdUrl, routes.Login.openIDCallback.absoluteURL(), openIdAttributes)
         .extend(_.value match {
-        case Redeemed(url) => Redirect(url)
-        case Thrown(t) => Redirect(routes.Login.login)
-      })
+          case Redeemed(url) => Redirect(url)
+          case Thrown(t) => Redirect(routes.Login.login)
+        })
     )
   }
 
@@ -99,6 +101,7 @@ object Login extends Controller with Logging {
             info.attributes.get("firstname").get,
             info.attributes.get("lastname").get
           )
+          loginLog.info(credentials.email)
           if (credentials.emailDomain == "guardian.co.uk") {
             Redirect(session.get("loginFromUrl").getOrElse("/")).withSession {
               session + ("identity" -> credentials.writeJson) - "loginFromUrl"
@@ -122,8 +125,4 @@ object Login extends Controller with Logging {
       session - "identity"
     }
   }
-}
-
-trait Logging {
-  implicit val log = Logger(getClass)
 }

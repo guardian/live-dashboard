@@ -15,18 +15,24 @@
 		</encoder>
     </appender>
 
-	<appender name="USER_ACTIVITY_LOGFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>logs/user-activity.log</file>
+	<appender name="LOGIN_LOGFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>logs/login.log</file>
 
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>logs/user-activity.log.%d{yyyy-MM-dd_HH}.gz</fileNamePattern>
-			<maxHistory>24</maxHistory>
+			<maxHistory>7</maxHistory>
 		</rollingPolicy>
 
 		<encoder>
-			<pattern>%msg%n</pattern>
+			<pattern>%date %msg%n</pattern>
 		</encoder>
 	</appender>
+
+    <!-- see http://logback.qos.ch/manual/configuration.html#overrridingCumulativity -->
+    <logger name="login" level="INFO" additivity="false">
+        <appender-ref ref="LOGIN_LOGFILE" />
+    </logger>
+
 
     <root level="INFO">
         <appender-ref ref="LOGFILE"/>

@@ -12,21 +12,21 @@ case class NewEntry() extends Movement { val img = Some("new") }
 case class Up() extends Movement { val img = Some("up") }
 case class Down() extends Movement { val img = Some("down") }
 
-
 case class HitReport(url: String, percent: Double, hits: Int, hitsPerSec: Double, events: List[Event], movement: Movement = Unchanged()) {
-  def summary = "%s %.1f%% (%d hits)" format(url, percent, hits)
+  def summary = "%s %.1f%% (%d hits)" format (url, percent, hits)
 
   lazy val referrers = events flatMap { _.referrer }
 
   lazy val referrersWithCounts = referrers.groupBy(identity).mapValues(_.size).toList.sortWith {
-    (x,y) => y._2 < x._2
+    (x, y) => y._2 < x._2
   }
 
   lazy val referrerHostCounts = referrers.flatMap(url => try { Some(new URL(url).getHost) } catch { case _ => None })
     .groupBy(identity).mapValues(_.size).toList.sortBy(_._2).reverse
 
-  lazy val referrerPercents: List[(String, Double)] = referrerHostCounts.map { case (host, count) =>
-    host -> (count * 100.0 / hits)
+  lazy val referrerPercents: List[(String, Double)] = referrerHostCounts.map {
+    case (host, count) =>
+      host -> (count * 100.0 / hits)
   }
 
   lazy val id = url.replace("/", "")
@@ -45,17 +45,15 @@ case class HitReport(url: String, percent: Double, hits: Int, hitsPerSec: Double
   }
 }
 
-
 case class ListsOfStuff(
-  all: TopHits = TopHits(),
-  everything: TopHits = TopHits(),
-  content: TopHits = TopHits(),
-  other: TopHits = TopHits(),
-  lastUpdated: DateTime = DateTime.now,
-  firstUpdated: DateTime = DateTime.now,
-  totalHits: Long = 0,
-  clickStreamSecs: Long = 0
-) {
+    all: TopHits = TopHits(),
+    everything: TopHits = TopHits(),
+    content: TopHits = TopHits(),
+    other: TopHits = TopHits(),
+    lastUpdated: DateTime = DateTime.now,
+    firstUpdated: DateTime = DateTime.now,
+    totalHits: Long = 0,
+    clickStreamSecs: Long = 0) {
   import ListsOfStuff._
 
   private val fmt = "d MMM yyyy h:mm:ss a"
@@ -67,7 +65,7 @@ case class ListsOfStuff(
 
   lazy val hitsScaledToAllServers = totalHits * Config.scalingFactor
   lazy val hitsPerSecond = hitsPerSecondOption.getOrElse("N/A").toString
-  lazy val hitsPerSecondOption = if (clickStreamSecs == 0) None else  Some(hitsScaledToAllServers / clickStreamSecs)
+  lazy val hitsPerSecondOption = if (clickStreamSecs == 0) None else Some(hitsScaledToAllServers / clickStreamSecs)
 
   lazy val minutesOfData = Config.eventHorizon / 1000 / 60
 

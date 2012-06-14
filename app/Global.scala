@@ -1,4 +1,4 @@
-import com.gu.management.play.{StatusCounters, RequestTimer}
+import com.gu.management.play.{ StatusCounters, RequestTimer }
 import controllers._
 import lib.Backend
 import play.api._

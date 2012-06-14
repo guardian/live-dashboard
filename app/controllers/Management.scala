@@ -3,7 +3,7 @@ package controllers
 import _root_.play.api.mvc.Action
 import com.gu.management._
 import lib.Backend
-import com.gu.management.play.{PlayHttpResponse, PlayHttpRequest, ManagementController}
+import com.gu.management.play.{ PlayHttpResponse, PlayHttpRequest, ManagementController }
 
 object Switches {
   lazy val all = Healthcheck.switch :: Nil
@@ -24,9 +24,9 @@ object Management extends ManagementController {
   val applicationName = "Live Dashboard"
   lazy val pages =
     new HealthcheckManagementPage() ::
-    alternativeHealthCheckPage ::
-    new ManifestPage() ::
-    new Switchboard(Switches.all, applicationName) ::
-    new StatusPage(applicationName, () => Metrics.all) ::
-    Nil
+      alternativeHealthCheckPage ::
+      new ManifestPage() ::
+      new Switchboard(Switches.all, applicationName) ::
+      new StatusPage(applicationName, () => Metrics.all) ::
+      Nil
 }
