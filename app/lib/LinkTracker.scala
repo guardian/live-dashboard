@@ -11,15 +11,15 @@ import org.jsoup.Jsoup
 import collection.JavaConversions._
 import java.net.URL
 
-class LinkTracker(url: String)(implicit actorSys: ActorSystem)  {
+class LinkTracker(url: String)(implicit actorSys: ActorSystem) {
   private val log = Logging(actorSys, this.getClass)
-  
+
   // the current outgoing links on this front
   val links = Agent[List[String]](Nil)
-  
+
   def refresh() {
     import HeaderNames._
-    
+
     links sendOff { l =>
       val retrievedLinksPromise = WS.url(url)
         .withHeaders(USER_AGENT -> "SEO live dashboard; contact graham.tackley@guardian.co.uk")

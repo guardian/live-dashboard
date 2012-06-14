@@ -10,14 +10,14 @@ import play.api.Logger
 class MqReader(processors: Seq[EventProcessor]) {
   val logger = Logger(getClass)
   var keepRunning = true
-  
+
   def stop() {
     logger.info("waiting for stop...")
     keepRunning = false
     Thread.sleep(500)
     logger.info("stop has hopefully happened")
   }
-  
+
   def start() {
     val context = ZMQ.context(1)
     val sub = context.socket(ZMQ.SUB)
@@ -50,7 +50,7 @@ class MqReader(processors: Seq[EventProcessor]) {
 
     sub.close()
     context.term()
-    
+
     logger.info("Stopped!")
   }
 }

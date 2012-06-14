@@ -85,9 +85,9 @@ object Login extends Controller {
       OpenID
         .redirectURL(googleOpenIdUrl, routes.Login.openIDCallback.absoluteURL(), openIdAttributes)
         .extend(_.value match {
-        case Redeemed(url) => Redirect(url)
-        case Thrown(t) => Redirect(routes.Login.login)
-      })
+          case Redeemed(url) => Redirect(url)
+          case Thrown(t) => Redirect(routes.Login.login)
+        })
     )
   }
 

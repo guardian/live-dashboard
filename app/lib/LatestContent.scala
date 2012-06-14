@@ -10,9 +10,8 @@ import play.api.libs.ws.WS
 import play.api.libs.concurrent.Promise
 
 case class LiveDashboardContent(
-  content: Content,
-  isLead: Option[Boolean] = None
-) {
+    content: Content,
+    isLead: Option[Boolean] = None) {
   lazy val isCommentable = content.safeFields.get("commentable").exists(_ == "true")
 }
 
@@ -20,7 +19,6 @@ object LiveDashboardContent {
   // this is a temporary hack :)
   implicit def ourContentToApiContent(c: LiveDashboardContent): Content = c.content
 }
-
 
 class LatestContent(implicit sys: ActorSystem) {
   val apiKey = "d7bd4fkrbgkmaehrfjsbcetu"
@@ -33,14 +31,14 @@ class LatestContent(implicit sys: ActorSystem) {
     "crosswords | culture | education | environment | fashion | film | football | theguardian | " +
     "theobserver | global | global-development | law | lifeandstyle | media | money | music | news | " +
     "politics | science | society | sport | stage | technology | tv-and-radio | travel | uk | world";
-  
+
   def refresh() {
     // "sendOff" means this may be a slow operation, so don't
     // perform it in one of the normal actor processing threads
     latest sendOff { content =>
       val lastDateTime = content.headOption.map(_.webPublicationDate) getOrElse (new DateTime().minusHours(4))
 
-      log.info("Getting latest content published since "+ lastDateTime + "...")
+      log.info("Getting latest content published since " + lastDateTime + "...")
 
       val apiNewContent: List[Content] =
         Api.search.fromDate(lastDateTime).showTags("all")
@@ -53,7 +51,7 @@ class LatestContent(implicit sys: ActorSystem) {
       // because of the way we handle dates we will always get at least one item of content repeated
       // so remove stuff we've already got from the api list
       val newContent = apiNewContent.filterNot(c => content.exists(_.id == c.id)).map(LiveDashboardContent(_))
-      
+
       log.info("New content size is " + newContent.size)
       if (!newContent.isEmpty) latest.sendOff(findLeadContent _)
 
@@ -64,7 +62,7 @@ class LatestContent(implicit sys: ActorSystem) {
       result
     }
   }
-  
+
   private def findLeadContent(contentList: List[LiveDashboardContent]): List[LiveDashboardContent] = {
     def leadContentForTag(tagId: String): Promise[Seq[String]] = {
       WS.url("http://content.guardianapis.com/%s.json" format tagId)
@@ -73,12 +71,12 @@ class LatestContent(implicit sys: ActorSystem) {
         .map { r => if (r.body.startsWith("<")) { log.info("*** tagId = " + tagId + " *** " + r.body) }; r }
         .map { r => (r.json \ "response" \ "leadContent" \\ "id").map(_.as[String]) }
     }
-    
+
     val contentMissingLeadStatus = contentList.filter(_.isLead.isEmpty)
     val leadSections = contentMissingLeadStatus.flatMap(_.sectionId).sorted.distinct
 
     log.info("Getting lead content status for " + leadSections)
-    
+
     val leadItemsPromise = for {
       section <- leadSections
     } yield {
@@ -87,9 +85,9 @@ class LatestContent(implicit sys: ActorSystem) {
     }
 
     log.debug("leadItemsPromise = " + leadItemsPromise)
-    
+
     // now redeem those promises
-    val leadItems = leadItemsPromise.flatMap { 
+    val leadItems = leadItemsPromise.flatMap {
       case (section, promise) =>
         promise.await.fold(
           onError = { t =>
@@ -101,20 +99,20 @@ class LatestContent(implicit sys: ActorSystem) {
     }.toMap
 
     log.debug("leadItems = " + leadItems)
-    
+
     val result = contentList.map {
       case c if c.isLead.isDefined => c
       case c if c.sectionId.isEmpty => c.copy(isLead = Some(false))
       case c =>
         val section = c.sectionId.get
         val leadList = leadItems.get(section).getOrElse(Nil)
-      
+
         val isLead = leadList contains c.id
-      
+
         log.debug("%s (%s) -> isLead = %s" format (c.id, section, isLead))
         log.debug("available lead content for this section: %s" format leadList.mkString("\t\n"))
         c.copy(isLead = Some(isLead))
-      
+
     }
 
     log.info("Lead content processing complete")

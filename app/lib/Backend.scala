@@ -2,10 +2,10 @@ package lib
 
 import java.util.concurrent.TimeUnit
 import com.gu.openplatform.contentapi.model.Content
-import org.joda.time.{Duration, DateTime}
+import org.joda.time.{ Duration, DateTime }
 import akka.actor._
 import akka.util.duration._
-import akka.dispatch.{Await, Future}
+import akka.dispatch.{ Await, Future }
 import akka.util.Timeout
 import akka.pattern.ask
 import concurrent.ops
@@ -65,7 +65,6 @@ object Backend {
   def liveSearchTerms = searchTerms()
 
   def publishedContent = latestContent.latest()
-
 
   def viewsPerSecond = currentLists.hitsPerSecondOption.getOrElse(0L)
 

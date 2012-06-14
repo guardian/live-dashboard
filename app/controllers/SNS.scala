@@ -1,13 +1,12 @@
 package controllers
 
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{ Action, Controller }
 import play.api.libs.ws.WS
 import net.liftweb.json
 import json.DefaultFormats
 import json.JsonAST.JValue
 import org.joda.time.DateTime
-import lib.{Backend, Event}
-
+import lib.{ Backend, Event }
 
 object SNS extends Controller {
 
@@ -17,20 +16,22 @@ object SNS extends Controller {
     request.body.asText map { text =>
       val notification = json.parse(text).extract[SNSNotification]
       notification.Type match {
-        case "Notification" =>  {
+        case "Notification" => {
           val pageViews = (json.parse(notification.Message)).extract[PageViews]
-          val events = pageViews.views map { view => Event(
-            ip = view.clientIp.getOrElse("-"),
-            dt = view.dt,
-            url = view.url,
-            method = "GET",
-            responseCode = 200,
-            referrer = view.documentReferrer,
-            userAgent = view.userAgent.getOrElse("-"),
-            geo = "-",
-            sel = view.previousPageSelector,
-            hash = view.previousPageElemHash
-          )}
+          val events = pageViews.views map { view =>
+            Event(
+              ip = view.clientIp.getOrElse("-"),
+              dt = view.dt,
+              url = view.url,
+              method = "GET",
+              responseCode = 200,
+              referrer = view.documentReferrer,
+              userAgent = view.userAgent.getOrElse("-"),
+              geo = "-",
+              sel = view.previousPageSelector,
+              hash = view.previousPageElemHash
+            )
+          }
 
           for {
             e <- events.filterNot(_.isSelfRefresh)
@@ -53,23 +54,23 @@ object SNS extends Controller {
       BadRequest("Expected some JSON")
     }
   }
-  
+
   case class PageViews(views: List[PageView])
   case class PageView(
-     v: String,
-     dt: DateTime,
-     url: String,
-     documentReferrer: Option[String],
+    v: String,
+    dt: DateTime,
+    url: String,
+    documentReferrer: Option[String],
 
-     browserId: BrowserId,
-     userAgent: Option[String],
-     clientIp: Option[String],
+    browserId: BrowserId,
+    userAgent: Option[String],
+    clientIp: Option[String],
 
-     // if this was a navigation, the following will be filled in
-     previousPage: Option[String],
-     previousPageSelector: Option[String],
-     previousPageElemHash: Option[String])
+    // if this was a navigation, the following will be filled in
+    previousPage: Option[String],
+    previousPageSelector: Option[String],
+    previousPageElemHash: Option[String])
   case class BrowserId(id: String)
-  
+
   case class SNSNotification(Message: String, TopicArn: String, Type: String, Token: Option[String])
 }

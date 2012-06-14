@@ -2,12 +2,12 @@ package controllers
 
 import play.api._
 import play.api.mvc._
-import lib.{HitReport, Backend}
-import com.gu.openplatform.contentapi.model.{MediaAsset, Tag, Content => ApiContent}
-import org.joda.time.{DateTimeZone, DateTime}
+import lib.{ HitReport, Backend }
+import com.gu.openplatform.contentapi.model.{ MediaAsset, Tag, Content => ApiContent }
+import org.joda.time.{ DateTimeZone, DateTime }
 
 object Application extends Controller {
-  
+
   def index = AuthAction { Ok(views.html.index(Backend.currentLists)) }
 
   def about = Action { Ok(views.html.about()) }
@@ -15,18 +15,20 @@ object Application extends Controller {
   def top10 = AuthAction { Ok(views.html.top10(Backend.currentLists.all)) }
   def top10chart = AuthAction { Ok(views.html.snippets.top10chart(Backend.currentLists.all)) }
 
-  def top20 = AuthAction { Ok(views.html.top20(Backend.currentLists))}
+  def top20 = AuthAction { Ok(views.html.top20(Backend.currentLists)) }
   def top20chart = AuthAction { Ok(views.html.snippets.top20chart(Backend.currentLists)) }
 
   def details = AuthAction { Ok(views.html.details(Backend.currentLists.everything)) }
 
-  def detail(id: String) = AuthAction { Ok(views.html.detail(
-    Backend.currentLists.everything.hits.find(_.id == id).get)
-  )}
+  def detail(id: String) = AuthAction {
+    Ok(views.html.detail(
+      Backend.currentLists.everything.hits.find(_.id == id).get)
+    )
+  }
 
   def search = AuthAction { Ok(views.html.search()) }
 
-  def userAgents = AuthAction { Ok(views.html.userAgents() ) }
+  def userAgents = AuthAction { Ok(views.html.userAgents()) }
 
   def userAgentsChart = AuthAction { Ok(views.html.snippets.userAgentsChart()) }
 
@@ -68,25 +70,22 @@ object Application extends Controller {
     Ok(views.html.snippets.contentChart(publishedContent))
   }
 
-
 }
 
-
 case class PublishedContent(
-  publicationDate: DateTime,
-  url: String,
-  title: String,
-  hitsPerSec: String,
-  section: String,
-  trailText: Option[String], 
-  tags: List[Tag],
-  hitReport: Option[HitReport],
-  altText: Option[String],
-  isLead: Boolean,
-  onUkFront: Boolean,
-  onUsFront: Boolean,
-  isCommentable: Boolean
-) {
+    publicationDate: DateTime,
+    url: String,
+    title: String,
+    hitsPerSec: String,
+    section: String,
+    trailText: Option[String],
+    tags: List[Tag],
+    hitReport: Option[HitReport],
+    altText: Option[String],
+    isLead: Boolean,
+    onUkFront: Boolean,
+    onUsFront: Boolean,
+    isCommentable: Boolean) {
   lazy val cpsCssClass = hitsPerSec match {
     case "0" => "zero"
     case s if s.startsWith("0") => ""
