@@ -67,7 +67,7 @@ case class ListsOfStuff(
 
   lazy val hitsScaledToAllServers = totalHits * Config.scalingFactor
   lazy val hitsPerSecond = {
-    val now = DateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
+    val now = DateTime.now
     val since = now.minusMillis(Config.eventHorizon.toInt)
     val results = ElasticSearch.client.prepareSearch(ElasticSearch.indexNameForDate(now))
       .setSize(0)
