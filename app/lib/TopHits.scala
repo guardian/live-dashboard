@@ -68,19 +68,14 @@ case class ListsOfStuff(
   lazy val hitsScaledToAllServers = totalHits * Config.scalingFactor
   lazy val hitsPerSecond = {
     val now = DateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
+    val since = now.minusMillis(Config.eventHorizon.toInt)
     val results = ElasticSearch.client.prepareSearch(ElasticSearch.indexNameForDate(now))
       .setSize(0)
-      .setQuery(QueryBuilders.rangeQuery("dt").from(now.minusMinutes(1)).to(now))
-      .addFacet(new DateHistogramFacetBuilder("dts").field("dt").interval("minute"))
+      .setQuery(QueryBuilders.rangeQuery("dt").from(since).to(now))
       .execute()
       .actionGet()
 
-    val facet = results.facets().facet(classOf[DateHistogramFacet], "dts")
-
-    import collection.JavaConverters._
-    val timeCountMap = facet.entries().asScala.map(_.count())
-
-    timeCountMap.head / 60
+    results.hits.totalHits() * 1000 / Config.eventHorizon
   }
 
   lazy val hitsPerSecondOption = if (clickStreamSecs == 0) None else Some(hitsScaledToAllServers / clickStreamSecs)
