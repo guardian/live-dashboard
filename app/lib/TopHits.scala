@@ -5,6 +5,8 @@ import java.net.URL
 import org.scala_tools.time.Imports._
 import controllers.routes
 import play.api.Logger
+import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.search.facet.datehistogram.{ DateHistogramFacet, DateHistogramFacetBuilder }
 
 sealed abstract class Movement { def img: Option[String] }
 case class Unchanged() extends Movement { val img = None }
@@ -64,7 +66,23 @@ case class ListsOfStuff(
   )
 
   lazy val hitsScaledToAllServers = totalHits * Config.scalingFactor
-  lazy val hitsPerSecond = hitsPerSecondOption.getOrElse("N/A").toString
+  lazy val hitsPerSecond = {
+    val now = DateTime.now.withSecondOfMinute(0).withMillisOfSecond(0)
+    val results = ElasticSearch.client.prepareSearch(ElasticSearch.indexNameForDate(now))
+      .setSize(0)
+      .setQuery(QueryBuilders.rangeQuery("dt").from(now.minusMinutes(1)).to(now))
+      .addFacet(new DateHistogramFacetBuilder("dts").field("dt").interval("minute"))
+      .execute()
+      .actionGet()
+
+    val facet = results.facets().facet(classOf[DateHistogramFacet], "dts")
+
+    import collection.JavaConverters._
+    val timeCountMap = facet.entries().asScala.map(_.count())
+
+    timeCountMap.head / 60
+  }
+
   lazy val hitsPerSecondOption = if (clickStreamSecs == 0) None else Some(hitsScaledToAllServers / clickStreamSecs)
 
   lazy val minutesOfData = Config.eventHorizon / 1000 / 60

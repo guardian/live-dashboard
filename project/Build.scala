@@ -20,6 +20,8 @@ object ApplicationBuild extends Build {
     "net.liftweb" %% "lift-json" % "2.4",
     "net.liftweb" %% "lift-json-ext" % "2.4",
     "com.amazonaws" % "aws-java-sdk" % "1.3.4",
+    "org.elasticsearch" % "elasticsearch" % "0.19.4",
+    "org.elasticsearch" % "elasticsearch-cloud-aws" % "1.6.0",
     "org.scala-sbt" %% "io" % "0.11.3",
     "com.gu" %% "management-play" % "5.12",
     "org.specs2" %% "specs2" % "1.6.1" % "test"

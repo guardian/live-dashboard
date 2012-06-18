@@ -33,6 +33,7 @@
         <appender-ref ref="LOGIN_LOGFILE" />
     </logger>
 
+    <logger name="org.elasticsearch.discovery" level="TRACE" />
 
     <root level="INFO">
         <appender-ref ref="LOGFILE"/>
