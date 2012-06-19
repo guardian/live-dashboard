@@ -14,22 +14,21 @@ case class NewEntry() extends Movement { val img = Some("new") }
 case class Up() extends Movement { val img = Some("up") }
 case class Down() extends Movement { val img = Some("down") }
 
-case class HitReport(url: String, percent: Double, hits: Int, hitsPerSec: Double, events: List[Event], movement: Movement = Unchanged()) {
+case class Referrer(url: String, count: Long)
+
+case class HitReport(url: String, percent: Double, hits: Int, hitsPerSec: Double,
+    topReferrers: Iterable[Referrer], movement: Movement = Unchanged()) {
   def summary = "%s %.1f%% (%d hits)" format (url, percent, hits)
 
-  lazy val referrers = events flatMap { _.referrer }
-
-  lazy val referrersWithCounts = referrers.groupBy(identity).mapValues(_.size).toList.sortWith {
-    (x, y) => y._2 < x._2
+  lazy val referrersWithCounts = topReferrers.map {
+    case Referrer(host, count) =>
+      host -> count
   }
 
-  lazy val referrerHostCounts = referrers.flatMap(url => try { Some(new URL(url).getHost) } catch { case _ => None })
-    .groupBy(identity).mapValues(_.size).toList.sortBy(_._2).reverse
-
-  lazy val referrerPercents: List[(String, Double)] = referrerHostCounts.map {
-    case (host, count) =>
+  lazy val referrerPercents: List[(String, Double)] = topReferrers.map {
+    case Referrer(host, count) =>
       host -> (count * 100.0 / hits)
-  }
+  } toList
 
   lazy val id = url.replace("/", "")
 
@@ -84,7 +83,7 @@ case class ListsOfStuff(
 
   Logger.info("hits = %d, timePeriodSecs = %d, hps = %s" format (totalHits, clickStreamSecs, hitsPerSecond))
 
-  def diff(newList: List[HitReport], clicks: ClickStream) = {
+  def diff(newList: List[HitReport], from: DateTime, to: DateTime, totalHits: Long) = {
     val (newContent, newOther) = newList.partition(isContent)
 
     copy(
@@ -92,10 +91,10 @@ case class ListsOfStuff(
       everything = everything.diff(newList),
       content = content.diff(newContent take 20),
       other = other.diff(newOther take 20),
-      lastUpdated = clicks.lastUpdated,
-      firstUpdated = clicks.firstUpdated,
-      totalHits = clicks.allClicks.size,
-      clickStreamSecs = clicks.secs
+      lastUpdated = to,
+      firstUpdated = from,
+      totalHits = totalHits,
+      clickStreamSecs = (to.getMillis - from.getMillis) / 1000
     )
   }
 

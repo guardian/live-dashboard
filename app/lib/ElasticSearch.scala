@@ -30,42 +30,9 @@ object ElasticSearch {
       .node()
   }
 
-  lazy val client = if (Config.stage != "DEV") node.client() else {
-    val tc = new TransportClient(settings)
-    for (host <- PoorMansEC2Discovery.hosts) {
-      tc.addTransportAddress(new InetSocketTransportAddress(host, 9300))
-    }
-    tc
-  }
+  lazy val client = if (Config.stage != "DEV") node.client() else
+    new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress("localhost", 9300))
 
   def indexNameForDate(dt: DateTime) = indexNameForDay(dt.toLocalDate)
   def indexNameForDay(dt: LocalDate) = "ophan-" + ISODateTimeFormat.date.print(dt)
-}
-
-object PoorMansEC2Discovery {
-  import collection.JavaConversions._
-  import Config.config2ToMappable
-
-  lazy val credentials = new BasicAWSCredentials(Config.accessKey, Config.secretKey)
-  lazy val ec2: AmazonEC2 = {
-    val client = new AmazonEC2Client(credentials)
-    client.setEndpoint("ec2.%s.amazonaws.com" format (Config.elasticsearchOptions("cloud.aws.region")))
-    client
-  }
-
-  def instanceResponse = ec2.describeInstances
-
-  def tagValue(instance: Instance, key: String) = instance.getTags.find(_.getKey == key).map(_.getValue).getOrElse("")
-
-  def hosts: Seq[String] = {
-    val hostOptions = for {
-      res <- instanceResponse.getReservations
-      instance <- res.getInstances if instance.getState.getName == InstanceStateName.Running.toString
-    } yield {
-      val tags = instance.getTags.map(t => t.getKey -> t.getValue).toMap
-      val requiredTags = Config.elasticsearchOptionsFromConfig.flatMap(_.getConfig("discovery.ec2.tags")).toMap
-      if (requiredTags.forall(x => tags.exists(_ == x))) Some(instance.getPublicDnsName) else None
-    }
-    hostOptions.flatten
-  }
 }

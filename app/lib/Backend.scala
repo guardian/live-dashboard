@@ -12,13 +12,11 @@ object Backend {
   val ukFrontLinkTracker = new LinkTracker("http://www.guardian.co.uk")
   val usFrontLinkTracker = new LinkTracker("http://www.guardiannews.com")
 
-  private val clickStream = new ClickStreamAgent(Config.eventHorizon)
   private val calculator = new Calculator()
   private val searchTerms = new SearchTermAgent()
 
   def start() {
-    system.scheduler.schedule(1 minute, 1 minute) { clickStream.truncate() }
-    system.scheduler.schedule(5 seconds, 5 seconds) { calculator.calculate(clickStream()) }
+    system.scheduler.schedule(5 seconds, 5 seconds) { calculator.calculate() }
     system.scheduler.schedule(5 seconds, 30 seconds) { latestContent.refresh() }
     system.scheduler.schedule(1 seconds, 20 seconds) { ukFrontLinkTracker.refresh() }
     system.scheduler.schedule(20 seconds, 60 seconds) { usFrontLinkTracker.refresh() }

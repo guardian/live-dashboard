@@ -18,8 +18,6 @@ object Application extends Controller {
   def top20 = AuthAction { Ok(views.html.top20(Backend.currentLists)) }
   def top20chart = AuthAction { Ok(views.html.snippets.top20chart(Backend.currentLists)) }
 
-  def details = AuthAction { Ok(views.html.details(Backend.currentLists.everything)) }
-
   def detail(id: String) = AuthAction {
     Ok(views.html.detail(
       Backend.currentLists.everything.hits.find(_.id == id).get)

@@ -12,9 +12,7 @@ GET     /top20chart                 controllers.Application.top20chart()
 
 GET     /about                      controllers.Application.about()
 
-GET     /details                    controllers.Application.details()
-
-GET     /detail/:id               controllers.Application.detail(id: String)
+GET     /detail/:id                 controllers.Application.detail(id: String)
 
 GET     /search                     controllers.Application.search()
 
