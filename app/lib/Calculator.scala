@@ -8,6 +8,7 @@ import org.elasticsearch.index.query.{ TermFilterBuilder, QueryBuilders }
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
 import org.elasticsearch.search.facet.terms.{ TermsFacet, TermsFacetBuilder }
+import org.elasticsearch.action.search.SearchResponse
 
 class Calculator(implicit sys: ActorSystem) {
   implicit val timeout = Timeout(20, TimeUnit.SECONDS)
@@ -46,7 +47,12 @@ object ESClickStreamFetcher {
 
     val secondsOfData = Config.eventHorizon / 1000
 
-    val hitReports = for (page <- response.facets().facet[TermsFacet]("urls")) yield {
+    val hitReports = hitReportsFrom(response, from, to, totalHits, secondsOfData)
+    (totalHits, hitReports)
+  }
+
+  def hitReportsFrom(response: SearchResponse, from: DateTime, to: DateTime, totalHits: Long, secondsOfData: Long) =
+    for (page <- response.facets().facet[TermsFacet]("urls")) yield {
       val url = page.term
       Logger.info(url)
 
@@ -69,6 +75,4 @@ object ESClickStreamFetcher {
           yield Referrer(referrer.term, referrer.count)
       )
     }
-    (totalHits, hitReports)
-  }
 }
