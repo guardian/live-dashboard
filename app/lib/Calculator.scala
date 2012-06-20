@@ -31,12 +31,6 @@ class Calculator(implicit sys: ActorSystem) {
   }
 }
 
-case class ESPageView(dt: DateTime, url: String, queryString: String, documentReferrer: Option[String],
-  browserId: String,
-  previousPage: Option[String],
-  previousPageSelector: Option[String],
-  previousPageElemHash: Option[String])
-
 object ESClickStreamFetcher {
   import scala.collection.JavaConversions._
   import QueryBuilders._
