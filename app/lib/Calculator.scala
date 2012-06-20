@@ -73,14 +73,4 @@ object ESClickStreamFetcher {
     }
     (totalHits, hitReports)
   }
-
-  implicit def hit2RichHit(hit: SearchHit): RichHit = new RichHit(hit)
-  class RichHit(hit: SearchHit) {
-    val theHit = Option(hit)
-    def apply[T](fieldName: String) = for {
-      h <- theHit
-      field <- Option(h.field(fieldName))
-    } yield field.value[T]()
-  }
-
 }
