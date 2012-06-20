@@ -5,8 +5,6 @@ import akka.agent.Agent
 import akka.actor.ActorSystem
 import org.scala_tools.time.Imports._
 import org.elasticsearch.index.query.{ TermFilterBuilder, QueryBuilders }
-import org.elasticsearch.search.SearchHit
-import akka.pattern.{ ask }
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
 import org.elasticsearch.search.facet.terms.{ TermsFacet, TermsFacetBuilder }
@@ -56,7 +54,7 @@ object ESClickStreamFetcher {
         .setQuery(filteredQuery(rangeQuery("dt").from(from).to(to),
           new TermFilterBuilder("url", url)))
         .addFields("dt", "url", "documentReferrer", "previousPageSelector", "previousPageElemHash")
-        .addFacet(new TermsFacetBuilder("referrrers").field("documentReferrer").size(10))
+        .addFacet(new TermsFacetBuilder("referrrers").field("referringHost").size(10))
         .setSize(100)
         .execute()
         .actionGet()
