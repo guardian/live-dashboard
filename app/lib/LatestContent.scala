@@ -8,6 +8,9 @@ import akka.actor.ActorSystem
 import akka.event.Logging
 import play.api.libs.ws.WS
 import play.api.libs.concurrent.Promise
+import scala.Some
+import com.gu.openplatform.contentapi.model.Content
+import com.gu.openplatform.contentapi.model.Tag
 
 case class LiveDashboardContent(
     content: Content,
@@ -25,7 +28,7 @@ class LatestContent(implicit sys: ActorSystem) {
   Api.apiKey = Some(apiKey)
 
   private val log = Logging(sys, this.getClass)
-  val latest = Agent[List[LiveDashboardContent]](Nil)
+  val latest = Agent[List[PublishedContent]](Nil)
 
   val editorialSections = "artanddesign | books | business | childrens-books-site | commentisfree | " +
     "crosswords | culture | education | environment | fashion | film | football | theguardian | " +
@@ -33,37 +36,20 @@ class LatestContent(implicit sys: ActorSystem) {
     "politics | science | society | sport | stage | technology | tv-and-radio | travel | uk | world";
 
   def refresh() {
-    // "sendOff" means this may be a slow operation, so don't
-    // perform it in one of the normal actor processing threads
-    latest sendOff { content =>
-      val lastDateTime = content.headOption.map(_.webPublicationDate) getOrElse (new DateTime().minusHours(4))
 
-      log.info("Getting latest content published since " + lastDateTime + "...")
+    log.info("Getting latest content published since " + new DateTime().minusHours(4) + "...")
 
-      val apiNewContent: List[Content] =
-        Api.search.fromDate(lastDateTime).showTags("all")
-          .orderBy("oldest").showFields("trailText,commentable")
-          .showMedia("picture")
-          .section(editorialSections)
-          .pageSize(50).results
-          .reverse
+    val apiNewContent: List[Content] =
+      Api.search.fromDate(new DateTime().minusHours(4)).showTags("all")
+        .orderBy("newest").showFields("trailText,commentable")
+        .showMedia("picture")
+        .section(editorialSections)
+        .pageSize(50).results
 
-      // because of the way we handle dates we will always get at least one item of content repeated
-      // so remove stuff we've already got from the api list
-      val newContent = apiNewContent.filterNot(c => content.exists(_.id == c.id)).map(LiveDashboardContent(_))
-
-      log.info("New content size is " + newContent.size)
-      if (!newContent.isEmpty) latest.sendOff(findLeadContent _)
-
-      val result = newContent ::: content.filter(_.webPublicationDate.plusHours(4).isAfterNow)
-
-      log.info("Content list is now " + result.size + " entries")
-
-      result
-    }
+    latest.sendOff(_ => asPublishedContent(apiNewContent))
   }
 
-  private def findLeadContent(contentList: List[LiveDashboardContent]): List[LiveDashboardContent] = {
+  private def asPublishedContent(contentList: List[Content]): List[PublishedContent] = {
     def leadContentForTag(tagId: String): Promise[Seq[String]] = {
       WS.url("http://content.guardianapis.com/%s.json" format tagId)
         .withQueryString("api-key" -> apiKey)
@@ -72,8 +58,7 @@ class LatestContent(implicit sys: ActorSystem) {
         .map { r => (r.json \ "response" \ "leadContent" \\ "id").map(_.as[String]) }
     }
 
-    val contentMissingLeadStatus = contentList.filter(_.isLead.isEmpty)
-    val leadSections = contentMissingLeadStatus.flatMap(_.sectionId).sorted.distinct
+    val leadSections = contentList.flatMap(_.sectionId).sorted.distinct
 
     log.info("Getting lead content status for " + leadSections)
 
@@ -100,23 +85,56 @@ class LatestContent(implicit sys: ActorSystem) {
 
     log.debug("leadItems = " + leadItems)
 
-    val result = contentList.map {
-      case c if c.isLead.isDefined => c
-      case c if c.sectionId.isEmpty => c.copy(isLead = Some(false))
-      case c =>
-        val section = c.sectionId.get
-        val leadList = leadItems.get(section).getOrElse(Nil)
-
-        val isLead = leadList contains c.id
-
-        log.debug("%s (%s) -> isLead = %s" format (c.id, section, isLead))
-        log.debug("available lead content for this section: %s" format leadList.mkString("\t\n"))
-        c.copy(isLead = Some(isLead))
-
+    val result = contentList.map { c =>
+      val hitReport = ElasticSearch.hitReportFor(c.webUrl)
+      val section = c.sectionName.getOrElse("")
+      PublishedContent(c.webPublicationDate, c.webUrl, c.webTitle,
+        hitReport.tidyHitsPerSec, section, c.safeFields.get("trailText"),
+        c.tags, Some(hitReport), altTextOfMainImageFor(c), isLead(c, leadItems),
+        Backend.ukFrontLinkTracker.links().contains(c.id),
+        Backend.usFrontLinkTracker.links().contains(c.id),
+        c.safeFields.get("commentable").exists(_ == "true"))
     }
 
     log.info("Lead content processing complete")
 
     result
+  }
+
+  def altTextOfMainImageFor(c: Content): Option[String] = {
+    val mainPic = c.mediaAssets.find(m => m.rel == "body" && m.index == 1) orElse
+      c.mediaAssets.find(m => m.rel == "gallery" && m.index == 1)
+
+    mainPic flatMap { m => m.fields.getOrElse(Map()).get("altText") }
+  }
+
+  def isLead(c: Content, leadItems: Map[String, Seq[String]]) = {
+    val section = c.sectionId.get
+    val leadList = leadItems.get(section).getOrElse(Nil)
+
+    leadList contains c.id
+  }
+}
+
+case class PublishedContent(
+    publicationDate: DateTime,
+    url: String,
+    title: String,
+    hitsPerSec: String,
+    section: String,
+    trailText: Option[String],
+    tags: List[Tag],
+    hitReport: Option[HitReport],
+    altText: Option[String],
+    isLead: Boolean,
+    onUkFront: Boolean,
+    onUsFront: Boolean,
+    isCommentable: Boolean) {
+  lazy val cpsCssClass = hitsPerSec match {
+    case "0" => "zero"
+    case s if s.startsWith("0") => ""
+    case "<0.1" => ""
+    case "trace" => ""
+    case _ => "high"
   }
 }

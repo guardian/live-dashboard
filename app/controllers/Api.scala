@@ -30,21 +30,4 @@ object Api extends Controller {
       Serialization.write(response)
     }
   }
-
-  case class ApiContent(path: String, title: String, publishDate: Long, publishDateString: String)
-
-  def content(callback: Option[String], since: Long) = Action {
-    withCallback(callback) {
-      val content = Backend.publishedContent.map { c =>
-        ApiContent(
-          path = "/" + c.id,
-          title = c.webTitle,
-          publishDate = c.webPublicationDate.getMillis,
-          publishDateString = c.webPublicationDate.toString
-        )
-      }.filter(_.publishDate > since)
-
-      Serialization.write(content)
-    }
-  }
 }
