@@ -19,7 +19,7 @@
 		<file>logs/login.log</file>
 
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>logs/user-activity.log.%d{yyyy-MM-dd_HH}.gz</fileNamePattern>
+			<fileNamePattern>logs/login.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
 			<maxHistory>7</maxHistory>
 		</rollingPolicy>
 
