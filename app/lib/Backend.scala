@@ -30,6 +30,11 @@ object Backend {
   def currentLists = calculator.listsOfStuff()
   def currentHits = calculator.hitReports()
 
+  def lastUpdated = calculator.lastUpdated()
+  def updateWindowStart = calculator.updateWindowStart
+
+  def totalHits = calculator.totalHits()
+
   def liveSearchTerms = searchTerms()
   def publishedContent = latestContent.latest()
 
