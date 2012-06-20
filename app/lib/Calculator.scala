@@ -61,7 +61,7 @@ object ESClickStreamFetcher {
           new TermFilterBuilder("url", url)))
         .addFields("dt", "url", "documentReferrer", "previousPageSelector", "previousPageElemHash")
         .addFacet(new TermsFacetBuilder("referrrers").field("referringHost").size(10))
-        .setSize(100)
+        .setSize(0)
         .execute()
         .actionGet()
 
