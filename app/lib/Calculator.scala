@@ -20,13 +20,9 @@ class Calculator(implicit sys: ActorSystem) {
     Logger.info("Recalculating...")
     val now = DateTime.now
     val since = now.minusMillis(Config.eventHorizon.toInt)
-    Logger.info("X")
-    val (totalHits, reports) = ESClickStreamFetcher.topPaths(since, now)
-    Logger.info("Y")
-    Logger.info(totalHits.toString)
-    hitReports send (_ => reports.toList)
-    listsOfStuff sendOff (_.diff(hitReports.get(), since, now, totalHits))
-    Logger.info("%s hits found" format (totalHits))
+    val (totalHits, allReports, contentReports, nonContentReports) = ESClickStreamFetcher.topPaths(since, now)
+    hitReports send (_ => allReports.toList)
+    listsOfStuff sendOff (_.diff(hitReports.get(), contentReports.toList, nonContentReports.toList, since, now, totalHits))
   }
 }
 
@@ -35,24 +31,30 @@ object ESClickStreamFetcher {
   import QueryBuilders._
 
   def topPaths(from: DateTime, to: DateTime) = {
-    val response = ElasticSearch.client.prepareSearch(ElasticSearch.indexNameForDate(to))
-      .setQuery(rangeQuery("dt").from(from).to(to))
-      .addFacet(new TermsFacetBuilder("urls").field("url").size(100))
-      .setSize(0)
-      .execute()
-      .actionGet()
+    val contentResponse = topPagesQuery.setQuery(filteredQuery(rangeQuery("dt").from(from).to(to),
+      new TermFilterBuilder("isContent", true))).execute().actionGet()
+    val nonContentResponse = topPagesQuery.setQuery(filteredQuery(rangeQuery("dt").from(from).to(to),
+      new TermFilterBuilder("isContent", false))).execute().actionGet()
+    val allResponse = topPagesQuery.setQuery(rangeQuery("dt").from(from).to(to)).execute().actionGet()
 
-    val totalHits = response.hits.totalHits
-    Logger.info("Z")
+    val totalHits = allResponse.hits.totalHits
 
     val secondsOfData = Config.eventHorizon / 1000
 
-    val hitReports = hitReportsFrom(response, from, to, totalHits, secondsOfData)
-    (totalHits, hitReports)
+    val contentHitReports = hitReportsFrom(contentResponse, from, to, totalHits, secondsOfData)
+    val nonContentHitReports = hitReportsFrom(nonContentResponse, from, to, totalHits, secondsOfData)
+    val allHitReports = hitReportsFrom(allResponse, from, to, totalHits, secondsOfData)
+
+    (totalHits, allHitReports, contentHitReports, nonContentHitReports)
   }
 
+  def topPagesQuery =
+    ElasticSearch.client.prepareSearch(ElasticSearch.indexNameForDate(DateTime.now))
+      .addFacet(new TermsFacetBuilder("urls").field("url").size(100))
+      .setSize(0)
+
   def hitReportsFrom(response: SearchResponse, from: DateTime, to: DateTime, totalHits: Long, secondsOfData: Long) =
-    for (page <- response.facets().facet[TermsFacet]("urls")) yield {
+    for (page <- response.facets().facet[TermsFacet]("urls").toList.take(10)) yield {
       val url = page.term
       Logger.info(url)
 

@@ -83,12 +83,11 @@ case class ListsOfStuff(
 
   Logger.info("hits = %d, timePeriodSecs = %d, hps = %s" format (totalHits, clickStreamSecs, hitsPerSecond))
 
-  def diff(newList: List[HitReport], from: DateTime, to: DateTime, totalHits: Long) = {
-    val (newContent, newOther) = newList.partition(isContent)
+  def diff(newAll: List[HitReport], newContent: List[HitReport], newOther: List[HitReport], from: DateTime, to: DateTime, totalHits: Long) = {
 
     copy(
-      all = all.diff(newList take 10),
-      everything = everything.diff(newList),
+      all = all.diff(newAll take 10),
+      everything = everything.diff(newAll),
       content = content.diff(newContent take 20),
       other = other.diff(newOther take 20),
       lastUpdated = to,
