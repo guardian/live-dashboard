@@ -24,8 +24,18 @@ class Calculator(implicit sys: ActorSystem) {
     lastUpdated send (DateTime.now)
     val (allReports, contentReports, nonContentReports) = topPaths
     hitReports send (allReports.toList)
-    listsOfStuff sendOff (_.diff(
-      hitReports.get(), contentReports.toList, nonContentReports.toList, updateWindowStart, lastUpdated(), totalHits()))
+    listsOfStuff sendOff { current =>
+      val newValue = current.diff(
+        hitReports.get(),
+        contentReports.toList,
+        nonContentReports.toList,
+        updateWindowStart,
+        lastUpdated(),
+        totalHits())
+
+      Logger.info(newValue.debugInfo)
+      newValue
+    }
   }
 
   import scala.collection.JavaConversions._

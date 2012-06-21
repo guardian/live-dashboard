@@ -13,7 +13,6 @@ object Backend {
   val usFrontLinkTracker = new LinkTracker("http://www.guardiannews.com")
 
   private val calculator = new Calculator()
-  private val searchTerms = new SearchTermAgent()
 
   def start() {
     system.scheduler.schedule(5 seconds, 5 seconds) { calculator.calculate() }
@@ -35,7 +34,6 @@ object Backend {
 
   def totalHits = calculator.totalHits()
 
-  def liveSearchTerms = searchTerms()
   def publishedContent = latestContent.latest()
 
   def viewsPerSecond = currentLists.hitsPerSecondOption.getOrElse(0L)

@@ -23,11 +23,4 @@ object Api extends Controller {
       Serialization.write(countsData)
     }
   }
-
-  def search(callback: Option[String], since: Long) = Action {
-    withCallback(callback) {
-      val response = Backend.liveSearchTerms.filter(_.dt > since).sortBy(_.dt)
-      Serialization.write(response)
-    }
-  }
 }

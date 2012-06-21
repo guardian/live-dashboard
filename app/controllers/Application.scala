@@ -24,8 +24,6 @@ object Application extends Controller {
     )
   }
 
-  def search = AuthAction { Ok(views.html.search()) }
-
   lazy val london = DateTimeZone.forID("Europe/London")
 
   def content = Action {

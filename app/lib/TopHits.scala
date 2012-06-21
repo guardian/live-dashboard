@@ -1,12 +1,8 @@
 package lib
 
-import xml.NodeSeq
-import java.net.URL
 import org.scala_tools.time.Imports._
 import controllers.routes
-import play.api.Logger
 import org.elasticsearch.index.query.QueryBuilders
-import org.elasticsearch.search.facet.datehistogram.{ DateHistogramFacet, DateHistogramFacetBuilder }
 
 sealed abstract class Movement { def img: Option[String] }
 case class Unchanged() extends Movement { val img = None }
@@ -28,7 +24,7 @@ case class HitReport(url: String, percent: Double, hits: Int, hitsPerSec: Double
   lazy val referrerPercents: List[(String, Double)] = topReferrers.map {
     case Referrer(host, count) =>
       host -> (count * 100.0 / hits)
-  } toList
+  }.toList
 
   lazy val id = url.replace("/", "")
 
@@ -77,11 +73,12 @@ case class ListsOfStuff(
     results.hits.totalHits() * 1000 / Config.eventHorizon
   }
 
-  lazy val hitsPerSecondOption = if (clickStreamSecs == 0) None else Some(hitsScaledToAllServers / clickStreamSecs)
+  lazy val hitsPerSecondOption = if (clickStreamSecs <= 0) None else Some(hitsScaledToAllServers / clickStreamSecs)
 
   lazy val minutesOfData = Config.eventHorizon / 1000 / 60
 
-  Logger.info("hits = %d, timePeriodSecs = %d, hps = %s" format (totalHits, clickStreamSecs, hitsPerSecond))
+  lazy val debugInfo =
+    "hits = %d, timePeriodSecs = %d, hps = %s" format (totalHits, clickStreamSecs, hitsPerSecond)
 
   def diff(newAll: List[HitReport], newContent: List[HitReport], newOther: List[HitReport], from: DateTime, to: DateTime, totalHits: Long) = {
 

@@ -14,13 +14,10 @@ GET     /about                      controllers.Application.about()
 
 GET     /detail/:id                 controllers.Application.detail(id: String)
 
-GET     /search                     controllers.Application.search()
-
 GET     /content                    controllers.Application.content()
 GET     /contentChart                controllers.Application.contentChart()
 
 GET     /api/counts                 controllers.Api.counts(callback: Option[String])
-GET     /api/search                 controllers.Api.search(callback: Option[String], since: Long ?= 0)
 
 GET     /login                      controllers.Login.login
 POST    /login                      controllers.Login.loginPost
