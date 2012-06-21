@@ -96,7 +96,7 @@
       "DependsOn" : "HostKeys",
       "Properties" : {
         "KeyName" : { "Ref" : "KeyName" },
-        "ImageId" : "ami-f9231b8d",
+        "ImageId" : "ami-ff231b8b",
         "SecurityGroups": [ { "Ref" : "EC2SecurityGroup" } ],
         "InstanceType" : { "Ref" : "InstanceType" },
         "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
@@ -109,6 +109,10 @@
 
             "chown jvmuser:jvmuser /home/jvmuser/.ssh\n",
             "chown jvmuser:jvmuser /home/jvmuser/.ssh/authorized_keys\n",
+
+            "mkdir /media/ephemeral0/elasticsearch\n",
+            "chown jvmuser:jvmuser /media/ephemeral0/elasticsearch\n",
+            "ln -s /media/ephemeral0/elasticsearch /var/lib/elasticsearch\n",
 
             "echo 'jvmuser ALL = NOPASSWD:/sbin/service live-dashboard *' >> /etc/sudoers\n",
 
