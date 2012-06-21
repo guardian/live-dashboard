@@ -112,6 +112,11 @@
 
             "echo 'jvmuser ALL = NOPASSWD:/sbin/service live-dashboard *' >> /etc/sudoers\n",
 
+            "cat > /etc/aws.conf <<EOF\n",
+            { "Fn::Join": ["", [ "accessKey=\"", { "Ref" : "HostKeys" }, "\"\n" ] ] },
+            { "Fn::Join": ["", [ "secretKey=\"", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]}, "\"\n" ] ] },
+            "EOF\n",
+
             "cat > /etc/stage <<EOF\n",
             { "Ref" : "Stage" }, "\n",
             "EOF\n",
