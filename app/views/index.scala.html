@@ -30,10 +30,13 @@
     </div>
 
     <div class="row">
+        <div class="span12">
         <p>
             <span class="label important">Important</span>
             This dashboard is still in relative infancy. If something looks wrong, it might well be wrong.
+            Site Catalyst is your golden source of truth.
         </p>
+        </div>
     </div>
 
     <div class="row">
@@ -99,6 +102,18 @@
 
             <p><a class="btn" href="@routes.Application.top10()">Show Me &raquo;</a></p>
         </div>
+
+        <div class="span4">
+            <h2><span class="label label-info">NEW!</span> Page Views graph</h2>
+
+            <p>A simple graph of overall site page views per minute, for the last 8 hours.</p>
+
+            <p>The graph is live and updates every minute. We&rsquo;re planning to do a lot more interesting
+            stuff here next. Right now it just shows overall traffic. </p>
+
+            <p><a class="btn" href="@routes.Application.graph()">Show Me &raquo;</a></p>
+        </div>
+
     </div>
 
     <footer>

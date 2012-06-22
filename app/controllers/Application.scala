@@ -33,4 +33,7 @@ object Application extends Controller {
     Ok(views.html.snippets.contentChart(Backend.publishedContent))
   }
 
+  def graph = AuthAction {
+    Ok(views.html.graph())
+  }
 }

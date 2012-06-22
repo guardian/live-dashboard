@@ -10,14 +10,19 @@ GET     /top10chart                 controllers.Application.top10chart()
 GET     /top20                      controllers.Application.top20()
 GET     /top20chart                 controllers.Application.top20chart()
 
+GET     /graph                      controllers.Application.graph()
+
 GET     /about                      controllers.Application.about()
 
 GET     /detail/:id                 controllers.Application.detail(id: String)
 
 GET     /content                    controllers.Application.content()
-GET     /contentChart                controllers.Application.contentChart()
+GET     /contentChart               controllers.Application.contentChart()
 
 GET     /api/counts                 controllers.Api.counts(callback: Option[String])
+
+GET     /api/pageviews              controllers.Api.pageViews(callback: Option[String])
+
 
 GET     /login                      controllers.Login.login
 POST    /login                      controllers.Login.loginPost
