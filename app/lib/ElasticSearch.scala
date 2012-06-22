@@ -18,7 +18,7 @@ object ElasticSearch {
 
   private lazy val hostname = InetAddress.getLocalHost.getHostName
   private lazy val settings = ImmutableSettings.settingsBuilder()
-    .put("node.name", "serf-" + hostname)
+    .put("node.name", "live-dashboard-" + hostname)
     .put(Config.elasticsearchOptions.asJava)
     .build()
 
