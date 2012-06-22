@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd $(dirname $0)
-java -jar app.jar &
+java -Xmx1024m -jar app.jar &
