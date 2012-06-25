@@ -10,6 +10,10 @@ $ ->
       renderTo: 'container'
       zoomType: 'x'
 
+    credits:
+      text: 'Powered by dashboard.ophan.co.uk'
+      href: 'http://dashboard.ophan.co.uk'
+
     title:
       text: 'Page views'
 
@@ -39,27 +43,7 @@ $ ->
 
     plotOptions:
       spline:
-        #lineWidth: 1
         marker: { enabled: false }
-#      area:
-##        fillColor:
-##          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1}
-##          stops: [
-##            [0, Highcharts.getOptions().colors[0]]
-##            [1, 'rgba(2,0,0,0)']
-##          ]
-##
-#        lineWidth: 1
-#        marker:
-#          enabled: false
-#          states:
-#            hover:
-#              enabled: true
-#              radius: 5
-#        shadow: false,
-#        states:
-#          hover:
-#            lineWidth: 1
 
     series: [{
       type: 'spline',
