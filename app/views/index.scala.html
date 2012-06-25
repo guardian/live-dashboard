@@ -118,7 +118,10 @@
 
     <footer>
 
-        <a href="@routes.Application.about()">What is this?</a>
+        @import com.gu.management.Manifest
+        Version @Manifest.asKeyValuePairs.getOrElse("Build", "DEV") @Manifest.asKeyValuePairs.get("Date").map(" built " + _) |
+        <a href="@routes.Application.changelog()">What&rsquo;s changed?</a> |
+        <a href="@routes.Application.about()">About the SEO Dashboard</a>
     </footer>
 </div>
 

@@ -1,4 +1,4 @@
-@(hits: lib.TopHits)
+@(topStuff: lib.ListsOfStuff)
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,9 +10,7 @@
     <style>
         html, body {
             background-color: #000;
-            /*color: #f0ffff;*/
-            font-family: 'News Cycle', sans-serif;
-            font-size: 24pt !important;
+            color: #f0ffff;
         }
 
         h1 {
@@ -20,6 +18,8 @@
         }
 
         .top-of-the-pops {
+            font-family: 'News Cycle', sans-serif;
+            font-size: 24pt !important;
         }
 
         .top-of-the-pops a {
@@ -80,7 +80,7 @@
 
 <div id="chart" class="container-fluid" data-ajax-refresh="@routes.Application.top10chart()">
 
-    @views.html.snippets.top10chart(hits)
+    @views.html.snippets.top10chart(topStuff)
 
 </div>
 </body>

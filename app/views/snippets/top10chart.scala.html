@@ -1,4 +1,4 @@
-@(t: lib.TopHits)
+@(topStuff: lib.ListsOfStuff)
 @import lib._
 <div class="page-header">
     <h1>Top 10
@@ -10,7 +10,7 @@
 
 
  <table class="top-of-the-pops table table-striped">
-     @for(hit <- t.hits) {
+     @for(hit <- topStuff.content.hits) {
         @rendertophit(hit)
      }
  </table>

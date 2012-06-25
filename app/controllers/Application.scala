@@ -11,9 +11,10 @@ object Application extends Controller {
   def index = AuthAction { Ok(views.html.index(Backend.currentLists)) }
 
   def about = Action { Ok(views.html.about()) }
+  def changelog = Action { Ok(views.html.changelog()) }
 
-  def top10 = AuthAction { Ok(views.html.top10(Backend.currentLists.all)) }
-  def top10chart = AuthAction { Ok(views.html.snippets.top10chart(Backend.currentLists.all)) }
+  def top10 = AuthAction { Ok(views.html.top10(Backend.currentLists)) }
+  def top10chart = AuthAction { Ok(views.html.snippets.top10chart(Backend.currentLists)) }
 
   def top20 = AuthAction { Ok(views.html.top20(Backend.currentLists)) }
   def top20chart = AuthAction { Ok(views.html.snippets.top20chart(Backend.currentLists)) }

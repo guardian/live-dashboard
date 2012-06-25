@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>About</title>
+    <link href='http://fonts.googleapis.com/css?family=Reenie+Beanie' rel='stylesheet' type='text/css'>
+
+    @views.html.snippets.includes()
+
+    <style>
+        body {
+            padding-top: 60px;
+        }
+
+        blockquote p {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+@views.html.snippets.topnav()
+
+<div class="container">
+    <div class="row">
+        <div class="span12">
+            <h1>Recent changes to the SEO Dashboard</h1>
+            <table class="top-of-the-pops table table-striped">
+               <thead>
+               <tr>
+                   <td>Build Number</td><td>Description</td>
+               </tr>
+               </thead>
+
+                <tbody>
+                    <tr>
+                        <td>48 (25 June 2012)</td>
+                        <td>
+                            <p>Added changelog</p>
+                            <p>Display link text instead of url for content on Top 10 and Top 20 pages</p>
+                            <p>Links in Top 10 and Top 20 pages now lead to the actual content, not details page -
+                             a new link to the details page is coming soon</p>
+                            <p>Don't display 0% referrers (these were actually ones between 0% and 1%, but it's confusing and
+                            not very useful)</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

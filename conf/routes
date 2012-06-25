@@ -13,6 +13,7 @@ GET     /top20chart                 controllers.Application.top20chart()
 GET     /graph                      controllers.Application.graph()
 
 GET     /about                      controllers.Application.about()
+GET     /changelog                  controllers.Application.changelog()
 
 GET     /detail/:id                 controllers.Application.detail(id: String)
 

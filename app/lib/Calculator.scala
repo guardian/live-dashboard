@@ -45,10 +45,14 @@ class Calculator(implicit sys: ActorSystem) {
     val to = lastUpdated()
     val from = updateWindowStart
 
-    val contentResponse = topPagesQuery.setQuery(filteredQuery(rangeQuery("dt").from(from).to(to),
-      new TermFilterBuilder("isContent", true))).execute().actionGet()
-    val nonContentResponse = topPagesQuery.setQuery(filteredQuery(rangeQuery("dt").from(from).to(to),
-      new TermFilterBuilder("isContent", false))).execute().actionGet()
+    val contentResponse = topPagesQuery.setQuery(
+      filteredQuery(rangeQuery("dt").from(from).to(to), new TermFilterBuilder("isContent", true)))
+      .execute().actionGet()
+
+    val nonContentResponse = topPagesQuery.setQuery(
+      filteredQuery(rangeQuery("dt").from(from).to(to), new TermFilterBuilder("isContent", false)))
+      .execute().actionGet()
+
     val allResponse = topPagesQuery.setQuery(rangeQuery("dt").from(from).to(to)).execute().actionGet()
 
     totalHits send (allResponse.hits.totalHits)

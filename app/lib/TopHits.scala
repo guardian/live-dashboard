@@ -16,6 +16,10 @@ case class HitReport(url: String, percent: Double, hits: Int, hitsPerSec: Double
     topReferrers: Iterable[Referrer], movement: Movement = Unchanged()) {
   def summary = "%s %.1f%% (%d hits)" format (url, percent, hits)
 
+  lazy val title = if (isContent) WebTitleCache.webTitleFor(url) else url
+
+  lazy val isContent = """/\d{4}/\w{3}/\d{2}""".r.findFirstIn(url).isDefined
+
   lazy val referrersWithCounts = topReferrers.map {
     case Referrer(host, count) =>
       host -> count
@@ -75,7 +79,7 @@ case class ListsOfStuff(
 
   lazy val hitsPerSecondOption = if (clickStreamSecs <= 0) None else Some(hitsScaledToAllServers / clickStreamSecs)
 
-  lazy val minutesOfData = Config.eventHorizon / 1000 / 60
+  lazy val minutesOfData = clickStreamSecs / 60
 
   lazy val debugInfo =
     "hits = %d, timePeriodSecs = %d, hps = %s" format (totalHits, clickStreamSecs, hitsPerSecond)
@@ -93,12 +97,6 @@ case class ListsOfStuff(
       clickStreamSecs = (to.getMillis - from.getMillis) / 1000
     )
   }
-
-  def isContent(h: HitReport) = contentMatch.findFirstIn(h.url).isDefined
-}
-
-object ListsOfStuff {
-  val contentMatch = """/\d{4}/\w{3}/\d{2}""".r
 }
 
 case class TopHits(hits: List[HitReport] = Nil) {
