@@ -25,6 +25,10 @@ GET     /api/counts                 controllers.Api.counts(callback: Option[Stri
 GET     /api/pageviews              controllers.Api.pageViews(callback: Option[String])
 
 
+GET     /api/mostread/:section      controllers.Api.mostReadForSection(section: String)
+GET     /api/mostread               controllers.Api.mostRead()
+
+
 GET     /login                      controllers.Login.login
 POST    /login                      controllers.Login.loginPost
 GET     /openIDCallback             controllers.Login.openIDCallback

@@ -7,9 +7,11 @@ import play.api.libs.concurrent._
 import net.liftweb.json._
 import lib.{ ElasticSearch, Backend }
 import org.joda.time.DateTime
-import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.index.query.{ FilterBuilders, TermFilterBuilder, QueryBuilders }
 import org.elasticsearch.search.facet.datehistogram.{ DateHistogramFacet, DateHistogramFacetBuilder }
 import scala.collection.JavaConverters._
+import org.elasticsearch.index.query.QueryBuilders._
+import org.elasticsearch.search.facet.terms.{ TermsFacet, TermsFacetBuilder }
 
 object Api extends Controller {
   lazy val log = Logger(getClass)
@@ -37,7 +39,7 @@ object Api extends Controller {
       .execute()
       .actionGet()
 
-    log.info("query took " + results.took())
+    log.info("getCounts query took " + results.took())
 
     val facet = results.facets().facet(classOf[DateHistogramFacet], "dts")
 
@@ -55,6 +57,46 @@ object Api extends Controller {
     withCallback(callback) {
       Serialization.write(counts)
     }
+  }
+
+  case class UrlCounts(url: String, count: Int)
+
+  import FilterBuilders._
+
+  private def mostReadForUrlsStartingWith(url: String): Seq[UrlCounts] = {
+    val toDate = DateTime.now
+    val fromDate = toDate.minusHours(24)
+
+    val results = ElasticSearch.client
+      .prepareSearch(ElasticSearch.indexNameForDate(fromDate), ElasticSearch.indexNameForDate(toDate))
+      .setSize(0)
+      .setQuery(rangeQuery("dt").from(fromDate).to(toDate))
+      .addFacet(
+        new TermsFacetBuilder("urls").field("url").size(20).facetFilter(
+          andFilter(
+            termFilter("isContent", true),
+            prefixFilter("url", url)
+          )
+        )
+      )
+      .execute()
+      .actionGet()
+
+    log.info("mostRead query took " + results.took())
+
+    results.facets.facet(classOf[TermsFacet], "urls").entries.asScala.map { entry =>
+      UrlCounts(entry.term, entry.count)
+    }
+  }
+
+  def mostReadForSection(section: String) = Action {
+    Ok(Serialization.write(mostReadForUrlsStartingWith("http://www.guardian.co.uk/" + section)))
+      .as("application/javascript")
+  }
+
+  def mostRead() = Action {
+    Ok(Serialization.write(mostReadForUrlsStartingWith("http://www.guardian.co.uk/")))
+      .as("application/javascript")
   }
 
 }
