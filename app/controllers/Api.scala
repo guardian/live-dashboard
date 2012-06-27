@@ -5,7 +5,7 @@ import cache.Cached
 import play.api.mvc._
 import play.api.libs.concurrent._
 import net.liftweb.json._
-import lib.{ ElasticSearch, Backend }
+import lib.{ ElasticSearchPromise, ElasticSearch, Backend }
 import org.joda.time.DateTime
 import org.elasticsearch.index.query.{ FilterBuilders, TermFilterBuilder, QueryBuilders }
 import org.elasticsearch.search.facet.datehistogram.{ DateHistogramFacet, DateHistogramFacetBuilder }
@@ -31,43 +31,48 @@ object Api extends Controller {
     }
   }
 
-  private def getCounts(fromDt: DateTime, toDt: DateTime, requiredInterval: String = "second") = {
-    val results = ElasticSearch.client.prepareSearch(ElasticSearch.indexNameForDate(DateTime.now))
+  import ElasticSearchPromise._
+
+  private def getCounts(fromDt: DateTime, toDt: DateTime, requiredInterval: String = "second") =
+    ElasticSearch.client.prepareSearch(ElasticSearch.indexNameForDate(DateTime.now))
       .setSize(0)
       .setQuery(QueryBuilders.rangeQuery("dt").from(fromDt).to(toDt))
       .addFacet(new DateHistogramFacetBuilder("dts").field("dt").interval(requiredInterval))
       .execute()
-      .actionGet()
+      .asPromise
+      .map { results =>
+        log.info("getCounts query took " + results.took())
 
-    log.info("getCounts query took " + results.took())
+        val facet = results.facets().facet(classOf[DateHistogramFacet], "dts")
 
-    val facet = results.facets().facet(classOf[DateHistogramFacet], "dts")
-
-    facet.entries().asScala.map { entry =>
-      entry.time() -> entry.count()
-    }
-  }
+        facet.entries().asScala.map { entry =>
+          List(entry.time(), entry.count())
+        }
+      }
 
   def pageViews(callback: Option[String] = None) = Action {
     val now = DateTime.now()
     val from = now.minusHours(8).withSecondOfMinute(0).withMillisOfSecond(0)
 
-    val counts = getCounts(from, now, "minute").map(_.productIterator.toList)
-
-    withCallback(callback) {
-      Serialization.write(counts)
+    Async {
+      getCounts(from, now, "minute").map { counts =>
+        withCallback(callback) {
+          Serialization.write(counts)
+        }
+      }
     }
+
   }
 
   case class UrlCounts(url: String, count: Int)
 
   import FilterBuilders._
 
-  private def mostReadForUrlsStartingWith(url: String): Seq[UrlCounts] = {
+  private def mostReadForUrlsStartingWith(url: String): Promise[Seq[UrlCounts]] = {
     val toDate = DateTime.now
     val fromDate = toDate.minusHours(24)
 
-    val results = ElasticSearch.client
+    ElasticSearch.client
       .prepareSearch(ElasticSearch.indexNameForDate(fromDate), ElasticSearch.indexNameForDate(toDate))
       .setSize(0)
       .setQuery(rangeQuery("dt").from(fromDate).to(toDate))
@@ -79,24 +84,32 @@ object Api extends Controller {
           )
         )
       )
-      .execute()
-      .actionGet()
+      .execute
+      .asPromise
+      .map { results =>
+        log.info("mostRead query took " + results.took())
 
-    log.info("mostRead query took " + results.took())
+        results.facets.facet(classOf[TermsFacet], "urls").entries.asScala.map { entry =>
+          UrlCounts(entry.term, entry.count)
+        }
+      }
 
-    results.facets.facet(classOf[TermsFacet], "urls").entries.asScala.map { entry =>
-      UrlCounts(entry.term, entry.count)
-    }
   }
 
   def mostReadForSection(section: String) = Action {
-    Ok(Serialization.write(mostReadForUrlsStartingWith("http://www.guardian.co.uk/" + section)))
-      .as("application/javascript")
+    Async {
+      mostReadForUrlsStartingWith("http://www.guardian.co.uk/" + section).map { result =>
+        Ok(Serialization.write(result)).as("application/javascript")
+      }
+    }
   }
 
   def mostRead() = Action {
-    Ok(Serialization.write(mostReadForUrlsStartingWith("http://www.guardian.co.uk/")))
-      .as("application/javascript")
+    Async {
+      mostReadForUrlsStartingWith("http://www.guardian.co.uk/").map { result =>
+        Ok(Serialization.write(result)).as("application/javascript")
+      }
+    }
   }
 
 }
