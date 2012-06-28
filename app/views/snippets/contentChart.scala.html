@@ -4,7 +4,7 @@
 <table class="published-content table table-striped">
    @for(c <- content) {
 <tr>
-         <td class="pub-date">@c.publicationDate.toString("HH:mm:ss")</td>
+         <td class="pub-date">@c.publicationDate.toLocalDateTime.toString("HH:mm:ss")</td>
          <td class="cps">
              <span class="label percent-cps @c.cpsCssClass" title="Average hits per second over the last 15 minutes">
                  @c.hitsPerSec
