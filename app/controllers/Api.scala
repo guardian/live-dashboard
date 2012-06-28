@@ -6,12 +6,15 @@ import play.api.mvc._
 import play.api.libs.concurrent._
 import net.liftweb.json._
 import lib.{ ElasticSearchPromise, ElasticSearch, Backend }
-import org.joda.time.DateTime
-import org.elasticsearch.index.query.{ FilterBuilders, TermFilterBuilder, QueryBuilders }
+import org.joda.time.{ Duration, DateTime }
+import org.elasticsearch.index.query.{ FilterBuilder, FilterBuilders, TermFilterBuilder, QueryBuilders }
 import org.elasticsearch.search.facet.datehistogram.{ DateHistogramFacet, DateHistogramFacetBuilder }
 import scala.collection.JavaConverters._
-import org.elasticsearch.index.query.QueryBuilders._
 import org.elasticsearch.search.facet.terms.{ TermsFacet, TermsFacetBuilder }
+
+import FilterBuilders._
+import org.elasticsearch.search.facet.FacetBuilders._
+import QueryBuilders._
 
 object Api extends Controller {
   lazy val log = Logger(getClass)
@@ -33,40 +36,77 @@ object Api extends Controller {
 
   import ElasticSearchPromise._
 
-  private def getCounts(fromDt: DateTime, toDt: DateTime, requiredInterval: String = "second") =
-    ElasticSearch.client.prepareSearch(ElasticSearch.indexNameForDate(DateTime.now))
+  private def getCounts(fromDt: DateTime, toDt: DateTime,
+    requiredInterval: String = "minute",
+    addToTime: Long = 0,
+    filter: FilterBuilder = FilterBuilders.matchAllFilter()) =
+
+    ElasticSearch.client.prepareSearch(ElasticSearch.indexNameForDate(fromDt), ElasticSearch.indexNameForDate(toDt))
       .setSize(0)
-      .setQuery(QueryBuilders.rangeQuery("dt").from(fromDt).to(toDt))
-      .addFacet(new DateHistogramFacetBuilder("dts").field("dt").interval(requiredInterval))
+      .setQuery(rangeQuery("dt").from(fromDt).to(toDt))
+      .addFacet(
+        dateHistogramFacet("dts").field("dt").interval(requiredInterval).facetFilter(filter)
+      )
       .execute()
       .asPromise
       .map { results =>
-        log.info("getCounts query took " + results.took())
+        log.info("getCounts from " + fromDt + " query took " + results.took())
 
         val facet = results.facets().facet(classOf[DateHistogramFacet], "dts")
 
-        facet.entries().asScala.map { entry =>
-          List(entry.time(), entry.count())
+        val list = facet.entries().asScala.toList.map { entry =>
+          List(entry.time() + addToTime, entry.count())
         }
+
+        if (list.size > 2)
+          // drop off the first and last values, they probably represent incomplete buckets
+          list.tail.init
+        else
+          list
       }
 
-  def pageViews(callback: Option[String] = None) = Action {
-    val now = DateTime.now()
-    val from = now.minusHours(8).withSecondOfMinute(0).withMillisOfSecond(0)
+  case class CountsResponse(today: List[List[Long]], lastWeek: List[List[Long]])
+
+  private def pageViewsWithFilter(callback: Option[String], filter: FilterBuilder): AsyncResult = {
+    // rouding "now" off to the resolution we're interested in, in the
+    // (unproved) hope of enabling elasticsearch to cache the query a bit more
+    val now = DateTime.now().withMillisOfSecond(0).withSecondOfMinute(0)
+    val from = now.minusHours(8)
+
+    // add 7 days onto last weeks dateTimes so we can compare against today
+    val oneWeek = Duration.standardDays(7).getMillis
 
     Async {
-      getCounts(from, now, "minute").map { counts =>
+      for {
+        today <- getCounts(from, now, "minute", filter = filter)
+        lastWeek <- getCounts(from.minusWeeks(1), now.minusWeeks(1), "minute", addToTime = oneWeek, filter = filter)
+      } yield {
         withCallback(callback) {
-          Serialization.write(counts)
+          Serialization.write(CountsResponse(today, lastWeek))
         }
       }
     }
+  }
 
+  def pageViews(callback: Option[String] = None, url: Option[String] = None, section: Option[String]) = Action {
+    val filter =
+      url.map(termFilter("url", _))
+        .orElse(section.map(s => prefixFilter("url", "http://www.guardian.co.uk/" + s)))
+        .getOrElse(
+          orFilter(
+            prefixFilter("url", "http://www.guardian.co.uk"),
+            prefixFilter("url", "http://www.guardiannews.com")
+          )
+        )
+
+    pageViewsWithFilter(callback, filter)
+  }
+
+  def pageViewsForSection(section: String, callback: Option[String] = None) = Action {
+    pageViewsWithFilter(callback, prefixFilter("url", "http://www.guardian.co.uk/" + section))
   }
 
   case class UrlCounts(url: String, count: Int)
-
-  import FilterBuilders._
 
   private def mostReadForUrlsStartingWith(url: String): Promise[Seq[UrlCounts]] = {
     val toDate = DateTime.now
@@ -77,7 +117,7 @@ object Api extends Controller {
       .setSize(0)
       .setQuery(rangeQuery("dt").from(fromDate).to(toDate))
       .addFacet(
-        new TermsFacetBuilder("urls").field("url").size(20).facetFilter(
+        termsFacet("urls").field("url").size(20).facetFilter(
           andFilter(
             termFilter("isContent", true),
             prefixFilter("url", url)

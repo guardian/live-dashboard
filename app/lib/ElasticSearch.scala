@@ -31,7 +31,7 @@ object ElasticSearch {
   }
 
   lazy val client = if (Config.stage != "DEV") node.client() else
-    new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress("localhost", 9300))
+    new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress("ec2-54-247-37-238.eu-west-1.compute.amazonaws.com", 9300))
 
   def indexNameForDate(dt: DateTime) = indexNameForDay(dt.toLocalDate)
   def indexNameForDay(dt: LocalDate) = "ophan-" + ISODateTimeFormat.date.print(dt)
@@ -42,8 +42,11 @@ object ElasticSearch {
     val from = Backend.updateWindowStart
 
     val pageResponse = ElasticSearch.client.prepareSearch(ElasticSearch.indexNameForDate(to))
-      .setQuery(filteredQuery(rangeQuery("dt").from(from).to(to),
-        new TermFilterBuilder("url", url)))
+      .setQuery(
+        filteredQuery(
+          rangeQuery("dt").from(from).to(to),
+          new TermFilterBuilder("url", url))
+      )
       .addFields("dt", "url", "documentReferrer", "previousPageSelector", "previousPageElemHash")
       .addFacet(new TermsFacetBuilder("referrrers").field("referringHost").size(10))
       .setSize(0)
