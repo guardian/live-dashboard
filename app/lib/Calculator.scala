@@ -9,8 +9,11 @@ import akka.util.Timeout
 import java.util.concurrent.TimeUnit
 import org.elasticsearch.search.facet.terms.{ TermsFacet, TermsFacetBuilder }
 import org.elasticsearch.action.search.SearchResponse
+import java.util.concurrent.atomic.AtomicLong
 
 class Calculator(implicit sys: ActorSystem) {
+  lazy val log = Logger(getClass)
+
   implicit val timeout = Timeout(20, TimeUnit.SECONDS)
 
   val hitReports = Agent(List[HitReport]())
@@ -19,8 +22,11 @@ class Calculator(implicit sys: ActorSystem) {
   def updateWindowStart = lastUpdated().minusMillis(Config.eventHorizon.toInt)
   val totalHits = Agent(0L)
 
+  val counter = new AtomicLong()
+
   def calculate() {
-    Logger.info("Recalculating...")
+    val thisRunNum = counter.incrementAndGet()
+    log.info(thisRunNum + ": recalculating...")
     lastUpdated send (DateTime.now)
     val (allReports, contentReports, nonContentReports) = topPaths
     hitReports send (allReports.toList)
@@ -33,7 +39,7 @@ class Calculator(implicit sys: ActorSystem) {
         lastUpdated(),
         totalHits())
 
-      Logger.info(newValue.debugInfo)
+      log.info(thisRunNum + ": " + newValue.debugInfo)
       newValue
     }
   }

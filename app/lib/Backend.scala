@@ -15,9 +15,9 @@ object Backend {
   private val calculator = new Calculator()
 
   def start() {
-    system.scheduler.schedule(10 seconds, 10 seconds) { calculator.calculate() }
+    system.scheduler.schedule(15 seconds, 15 seconds) { calculator.calculate() }
     system.scheduler.schedule(5 seconds, 30 seconds) { latestContent.refresh() }
-    system.scheduler.schedule(1 seconds, 20 seconds) { ukFrontLinkTracker.refresh() }
+    system.scheduler.schedule(10 seconds, 60 seconds) { ukFrontLinkTracker.refresh() }
     system.scheduler.schedule(20 seconds, 60 seconds) { usFrontLinkTracker.refresh() }
 
   }

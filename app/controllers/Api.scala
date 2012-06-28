@@ -112,6 +112,8 @@ object Api extends Controller {
     val toDate = DateTime.now
     val fromDate = toDate.minusHours(24)
 
+    log.info("mostRead (" + url + ") query starting...")
+
     ElasticSearch.client
       .prepareSearch(ElasticSearch.indexNameForDate(fromDate), ElasticSearch.indexNameForDate(toDate))
       .setSize(0)
@@ -127,7 +129,7 @@ object Api extends Controller {
       .execute
       .asPromise
       .map { results =>
-        log.info("mostRead query took " + results.took())
+        log.info("mostRead (" + url + ") query took " + results.took())
 
         results.facets.facet(classOf[TermsFacet], "urls").entries.asScala.map { entry =>
           UrlCounts(entry.term, entry.count)
