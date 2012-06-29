@@ -23,17 +23,19 @@ object LiveDashboardContent {
   implicit def ourContentToApiContent(c: LiveDashboardContent): Content = c.content
 }
 
+object LatestContent {
+  val editorialSections = "artanddesign | books | business | childrens-books-site | commentisfree | " +
+    "crosswords | culture | education | environment | fashion | film | football | theguardian | " +
+    "theobserver | global | global-development | law | lifeandstyle | media | money | music | news | " +
+    "politics | science | society | sport | stage | technology | tv-and-radio | travel | uk | world"
+}
+
 class LatestContent(implicit sys: ActorSystem) {
   val apiKey = "d7bd4fkrbgkmaehrfjsbcetu"
   Api.apiKey = Some(apiKey)
 
   private val log = Logging(sys, this.getClass)
   val latest = Agent[List[PublishedContent]](Nil)
-
-  val editorialSections = "artanddesign | books | business | childrens-books-site | commentisfree | " +
-    "crosswords | culture | education | environment | fashion | film | football | theguardian | " +
-    "theobserver | global | global-development | law | lifeandstyle | media | money | music | news | " +
-    "politics | science | society | sport | stage | technology | tv-and-radio | travel | uk | world";
 
   def refresh() {
 
@@ -43,7 +45,7 @@ class LatestContent(implicit sys: ActorSystem) {
       Api.search.fromDate(new DateTime().minusHours(4)).showTags("all")
         .orderBy("newest").showFields("trailText,commentable")
         .showMedia("picture")
-        .section(editorialSections)
+        .section(LatestContent.editorialSections)
         .pageSize(50).results
 
     latest.sendOff(_ => asPublishedContent(apiNewContent))

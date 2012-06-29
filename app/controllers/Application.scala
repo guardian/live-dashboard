@@ -2,8 +2,8 @@ package controllers
 
 import play.api._
 import play.api.mvc._
-import lib.{ HitReport, Backend }
-import com.gu.openplatform.contentapi.model.{ MediaAsset, Tag, Content => ApiContent }
+import lib.{ LatestContent, HitReport, Backend }
+import com.gu.openplatform.contentapi.model.{ Content => ApiContent, Section, MediaAsset, Tag }
 import org.joda.time.{ DateTimeZone, DateTime }
 
 object Application extends Controller {
@@ -34,7 +34,18 @@ object Application extends Controller {
     Ok(views.html.snippets.contentChart(Backend.publishedContent))
   }
 
-  def graph = AuthAction {
-    Ok(views.html.graph())
+  lazy val sections = com.gu.openplatform.contentapi.Api.sections
+    .section(LatestContent.editorialSections)
+    .response.results
+    .sortBy(_.webTitle)
+
+  //  lazy val sections = List(
+  //    Section("sport", "Sport", "a", "b"),
+  //    Section("uk", "Uk News", "a", "b"),
+  //    Section("world", "World News", "a", "b")
+  //  )
+
+  def graph = AuthAction { req =>
+    Ok(views.html.graph(sections, req.queryString.get("section").flatMap(_.headOption)))
   }
 }

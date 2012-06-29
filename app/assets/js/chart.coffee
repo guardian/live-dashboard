@@ -40,6 +40,9 @@ $ ->
       title:
         text: null
 
+    tooltip:
+      xDateFormat: '%H:%M'
+
     yAxis:
       min: 0
       title:
