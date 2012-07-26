@@ -25,23 +25,9 @@ object Backend {
   val mqReader = new MqReader(listener :: searchTerms :: Nil)
 
   def start() {
-    system.scheduler.schedule(1 minute, 1 minute, listener, ClickStreamActor.TruncateClickStream)
-    system.scheduler.schedule(5 seconds, 5 seconds, listener, ClickStreamActor.SendClickStreamTo(calculator))
-    system.scheduler.schedule(5 seconds, 30 seconds) { latestContent.refresh() }
-    system.scheduler.schedule(1 seconds, 20 seconds) { ukFrontLinkTracker.refresh() }
-    system.scheduler.schedule(20 seconds, 60 seconds) { usFrontLinkTracker.refresh() }
-
-    spawn {
-      mqReader.start()
-    }
-
-    listener ! Event("1.1.1.1", new DateTime(), "/dummy", "GET", 200, Some("http://www.google.com"), "my agent", "geo!")
-    searchTerms ! Event("1.1.1.1", new DateTime(), "/search?q=dummy&a=b&c=d%2Fj", "GET", 200, Some("http://www.google.com"), "my agent", "geo!")
   }
 
   def stop() {
-    mqReader.stop()
-    system.shutdown()
   }
 
   // So this is a bad way to do this, should use akka Agents instead (which can read
